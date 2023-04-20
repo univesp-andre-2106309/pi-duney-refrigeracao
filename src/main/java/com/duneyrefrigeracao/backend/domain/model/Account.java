@@ -13,14 +13,22 @@ import java.util.Date;
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private String name;
+    private String firstName;
     @Column(nullable = false)
+    private String lastName;
+    @Column(nullable = false, unique = true)
+    public String username;
+    @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
+    private Date birthDate;
+    @Column(nullable = false)
+    private String salt;
     @Column(nullable = false)
     private Boolean isEnabled;
     @Column(nullable = false)
