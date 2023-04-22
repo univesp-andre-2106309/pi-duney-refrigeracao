@@ -1,4 +1,4 @@
-package com.duneyrefrigeracao.backend.presentation.dataobject.generic;
+package com.duneyrefrigeracao.backend.application.dataobject.generic;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

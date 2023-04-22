@@ -2,11 +2,11 @@ package com.duneyrefrigeracao.backend.presentation.controller;
 
 import com.duneyrefrigeracao.backend.application.service.AccountService;
 import com.duneyrefrigeracao.backend.domain.exception.AccountValidationException;
-import com.duneyrefrigeracao.backend.presentation.dataobject.generic.ExceptionResponse;
-import com.duneyrefrigeracao.backend.presentation.dataobject.request.account.PostCreateAccountReq;
-import com.duneyrefrigeracao.backend.presentation.dataobject.request.account.PostValidateLoginReq;
-import com.duneyrefrigeracao.backend.presentation.dataobject.response.account.PostCreateAccountResp;
-import com.duneyrefrigeracao.backend.presentation.dataobject.response.account.PostValidateLoginResp;
+import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionResponse;
+import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostCreateAccountReq;
+import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostValidateLoginReq;
+import com.duneyrefrigeracao.backend.application.dataobject.response.account.PostCreateAccountResp;
+import com.duneyrefrigeracao.backend.application.dataobject.response.account.PostValidateLoginResp;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

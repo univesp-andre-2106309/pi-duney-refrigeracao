@@ -6,12 +6,20 @@ import org.springframework.stereotype.Component;
 public class UnitOfWork implements IUnitOfWork{
 
     public AccountRepository getAccountRepository() {
-        return accountRepository;
+        return this.accountRepository;
+    }
+
+    @Override
+    public ClienteRepository getClienteRepository() {
+        return this.clienteRepository;
     }
 
     private final AccountRepository accountRepository;
 
-    public UnitOfWork(AccountRepository accountRepository) {
+    private final ClienteRepository clienteRepository;
+
+    public UnitOfWork(AccountRepository accountRepository, ClienteRepository clienteRepository) {
         this.accountRepository = accountRepository;
+        this.clienteRepository = clienteRepository;
     }
 }

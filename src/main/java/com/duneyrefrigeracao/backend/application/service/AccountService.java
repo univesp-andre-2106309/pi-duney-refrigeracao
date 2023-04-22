@@ -6,8 +6,7 @@ import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
 import com.duneyrefrigeracao.backend.infrastructure.encryption.IEncrypter;
 import com.duneyrefrigeracao.backend.infrastructure.repository.IUnitOfWork;
 import com.duneyrefrigeracao.backend.infrastructure.security.JwtProvider;
-import com.duneyrefrigeracao.backend.presentation.dataobject.request.account.PostCreateAccountReq;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostCreateAccountReq;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class AccountService {

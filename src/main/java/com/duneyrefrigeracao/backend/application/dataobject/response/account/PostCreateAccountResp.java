@@ -1,4 +1,4 @@
-package com.duneyrefrigeracao.backend.presentation.dataobject.response.account;
+package com.duneyrefrigeracao.backend.application.dataobject.response.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
