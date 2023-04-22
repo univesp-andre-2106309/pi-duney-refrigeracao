@@ -1,6 +1,7 @@
 package com.duneyrefrigeracao.backend.presentation.controller;
 
 import com.duneyrefrigeracao.backend.application.service.AccountService;
+import com.duneyrefrigeracao.backend.application.service.IAccountService;
 import com.duneyrefrigeracao.backend.domain.exception.AccountValidationException;
 import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionResponse;
 import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostCreateAccountReq;
@@ -15,9 +16,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/account")
 public class AccountController {
 
-    private final AccountService accountService;
+    private final IAccountService accountService;
 
-    public AccountController(AccountService accountService) {
+    public AccountController(IAccountService accountService) {
         this.accountService = accountService;
     }
 

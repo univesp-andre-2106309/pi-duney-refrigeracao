@@ -5,7 +5,7 @@ import com.duneyrefrigeracao.backend.domain.model.Account;
 import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
 import com.duneyrefrigeracao.backend.infrastructure.encryption.IEncrypter;
 import com.duneyrefrigeracao.backend.infrastructure.repository.IUnitOfWork;
-import com.duneyrefrigeracao.backend.infrastructure.security.JwtProvider;
+import com.duneyrefrigeracao.backend.infrastructure.security.IJwtProvider;
 import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostCreateAccountReq;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,14 +17,14 @@ import java.util.ArrayList;
 import java.util.Date;
 
 @Service
-public class AccountService {
+public class AccountService implements  IAccountService {
 
     private final IUnitOfWork _unitOfWork;
     private final IEncrypter _encrypter;
 
-    private final JwtProvider _jwtProvider;
+    private final IJwtProvider _jwtProvider;
 
-    public AccountService(IUnitOfWork _unitOfWork, IEncrypter _encrypter, JwtProvider _jwtProvider) {
+    public AccountService(IUnitOfWork _unitOfWork, IEncrypter _encrypter, IJwtProvider _jwtProvider) {
         this._unitOfWork = _unitOfWork;
         this._encrypter = _encrypter;
         this._jwtProvider = _jwtProvider;
@@ -68,7 +68,7 @@ public class AccountService {
              return account;
          }catch(AccountValidationException ave) {
              //TODO: Refazer os exceptions de forma mais padronizada
-             ave.printStackTrace();
+             //ave.printStackTrace();
              throw ave;
          } catch(Exception er) {
              er.printStackTrace();

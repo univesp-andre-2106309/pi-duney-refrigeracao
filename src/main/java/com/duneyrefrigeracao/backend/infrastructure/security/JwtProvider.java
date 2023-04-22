@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
-public class JwtProvider {
+public class JwtProvider implements IJwtProvider {
 
     //Definido por minutos
     private static final int TOKEN_DURATION = 15;

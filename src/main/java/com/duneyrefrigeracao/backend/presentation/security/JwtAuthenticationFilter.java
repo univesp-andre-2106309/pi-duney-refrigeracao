@@ -1,7 +1,7 @@
 package com.duneyrefrigeracao.backend.presentation.security;
 
-import com.duneyrefrigeracao.backend.application.service.AccountService;
-import com.duneyrefrigeracao.backend.infrastructure.security.JwtProvider;
+import com.duneyrefrigeracao.backend.application.service.IAccountService;
+import com.duneyrefrigeracao.backend.infrastructure.security.IJwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,10 +20,10 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
 
-    private final JwtProvider _jwtProvider;
-    private final AccountService _accountService;
+    private final IJwtProvider _jwtProvider;
+    private final IAccountService _accountService;
 
-    public JwtAuthenticationFilter(@Lazy AuthenticationManager authenticationManager, JwtProvider _jwtProvider, AccountService _accountService) {
+    public JwtAuthenticationFilter(@Lazy AuthenticationManager authenticationManager, IJwtProvider _jwtProvider, IAccountService _accountService) {
         super(authenticationManager);
         this._jwtProvider = _jwtProvider;
         this._accountService = _accountService;
