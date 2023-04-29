@@ -8,10 +8,13 @@ import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.Pos
 import com.duneyrefrigeracao.backend.application.mapper.ClienteMapper;
 import com.duneyrefrigeracao.backend.application.service.ClienteService;
 import com.duneyrefrigeracao.backend.application.service.IClienteService;
+import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
 import com.duneyrefrigeracao.backend.domain.exception.ClienteExistenteException;
 import com.duneyrefrigeracao.backend.domain.exception.EmailPatternException;
 import com.duneyrefrigeracao.backend.domain.model.Cliente;
 import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
+import com.duneyrefrigeracao.backend.infrastructure.logging.ILogging;
+import com.duneyrefrigeracao.backend.infrastructure.logging.Logging;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,16 +29,18 @@ public class ClienteController {
 
 
     private final IClienteService _service;
+    private ILogging _logging;
 
     public ClienteController(IClienteService _service) {
         this._service = _service;
+        this._logging = new Logging(ClienteController.class);
     }
 
     @PostMapping("/busca")
     public ResponseEntity<Object> postBuscarClientes(@RequestBody PostBuscarClientesReq request,
                                                      @RequestParam(value = "index", defaultValue = "0") String indexValue) {
-
         try {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando clientes, index %s, campo nome: %s, campo documento %s", indexValue, request.nome(), request.documento()));
             Tuple<Long, Collection<Cliente>> result =
                     _service.getClientesByParams(request.nome(), request.documento(), Integer.parseInt(indexValue));
 
@@ -44,6 +49,7 @@ public class ClienteController {
                     result.getSecondValue()
             ));
         } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s",er.getMessage()));
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -64,16 +70,19 @@ public class ClienteController {
                     formattedDate
             ));
         } catch (EmailPatternException er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Email já existente no banco de dados!"));
             return ResponseEntity.badRequest().body(new ExceptionResponse(
                     "Erro de validação",
                     er.getMessage()
             ));
         } catch (ClienteExistenteException er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Cliente já existente no banco de dados!"));
             return ResponseEntity.badRequest().body(new ExceptionResponse(
                     "Erro ao dicionar cliente",
                     er.getMessage()
             ));
         } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro não tratado -> %s", er.getMessage()));
             return ResponseEntity.internalServerError().build();
         }
     }

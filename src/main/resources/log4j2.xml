@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="logging_file">./logs</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="file"
+                     filePattern="${logging_file}/$${date:yyyy-MM}/$${date:MM-dd}/logs.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss}{UTC} || %-5level|| [requestId: %X{requestId}] %logger{36}: %msg %n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+        </RollingFile>
+        <Console name="logging_console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} [%t] || %-5level|| [requestId: %X{requestId}] %logger{36}: %msg%n" />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="logger_stack" level="info" additivity="false">
+            <AppenderRef ref="file"/>
+            <AppenderRef ref="logging_console"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="logging_console"/>
+            <AppenderRef ref="file"/>
+        </Root>
+    </Loggers>
+</Configuration>
