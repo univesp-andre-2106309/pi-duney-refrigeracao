@@ -1,4 +1,4 @@
-package com.duneyrefrigeracao.backend.presentation.security;
+package com.duneyrefrigeracao.backend.presentation.filter;
 
 import com.duneyrefrigeracao.backend.application.service.IAccountService;
 import com.duneyrefrigeracao.backend.infrastructure.security.IJwtProvider;

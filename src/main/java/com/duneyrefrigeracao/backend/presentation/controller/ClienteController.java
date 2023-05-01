@@ -36,13 +36,14 @@ public class ClienteController {
         this._logging = new Logging(ClienteController.class);
     }
 
-    @PostMapping("/busca")
-    public ResponseEntity<Object> postBuscarClientes(@RequestBody PostBuscarClientesReq request,
+    @GetMapping("/busca")
+    public ResponseEntity<Object> postBuscarClientes(@RequestParam(value = "documento",defaultValue = "") String documentoValue,
+                                                     @RequestParam(value = "nome",defaultValue = "") String nomeValue,
                                                      @RequestParam(value = "index", defaultValue = "0") String indexValue) {
         try {
-            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando clientes, index %s, campo nome: %s, campo documento %s", indexValue, request.nome(), request.documento()));
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando clientes, index %s, campo nome: %s, campo documento %s", indexValue, nomeValue, documentoValue));
             Tuple<Long, Collection<Cliente>> result =
-                    _service.getClientesByParams(request.nome(), request.documento(), Integer.parseInt(indexValue));
+                    _service.getClientesByParams(nomeValue, documentoValue, Integer.parseInt(indexValue));
 
             return ResponseEntity.ok().body(new PostBuscarClientesResp(
                     result.getFirstValue(),
