@@ -2,7 +2,7 @@ package com.duneyrefrigeracao.backend.presentation.controller;
 
 import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionResponse;
 import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.ClienteDTO;
-import com.duneyrefrigeracao.backend.application.dataobject.request.account.PutUpdateClienteReq;
+import com.duneyrefrigeracao.backend.application.dataobject.request.cliente.PutUpdateClienteReq;
 import com.duneyrefrigeracao.backend.application.dataobject.request.cliente.PostAdicionarClienteReq;
 import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.GetClienteByIdResponse;
 import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PostAdicionarClienteResp;

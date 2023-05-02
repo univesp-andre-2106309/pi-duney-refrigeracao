@@ -1,4 +1,4 @@
-package com.duneyrefrigeracao.backend.application.dataobject.request.account;
+package com.duneyrefrigeracao.backend.application.dataobject.request.cliente;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;

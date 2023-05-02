@@ -1,8 +1,11 @@
 package com.duneyrefrigeracao.backend.presentation.controller;
 
 
-import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostUpdateAccountReq;
-import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostUpdatePasswordReq;
+import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.AccountDTO;
+import com.duneyrefrigeracao.backend.application.dataobject.request.account.PutUpdateAccountReq;
+import com.duneyrefrigeracao.backend.application.dataobject.request.account.PatchUpdatePasswordReq;
+import com.duneyrefrigeracao.backend.application.dataobject.response.account.PatchUpdatePasswordResp;
+import com.duneyrefrigeracao.backend.application.dataobject.response.account.PutUpdateAccountResp;
 import com.duneyrefrigeracao.backend.application.mapper.AccountMapper;
 import com.duneyrefrigeracao.backend.application.service.IAccountService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
@@ -22,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api/account")
@@ -84,7 +89,7 @@ public class AccountController {
     }
 
     @PutMapping("/update-account")
-    public ResponseEntity<Object> UpdateAccount(@RequestBody PostUpdateAccountReq request){
+    public ResponseEntity<Object> UpdateAccount(@RequestBody PutUpdateAccountReq request){
 
         try{
             AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
@@ -93,7 +98,16 @@ public class AccountController {
 
             this._accountService.accountUpdate(account);
 
-            return ResponseEntity.ok().build();
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
+            String formattedDate = formatter.format(date);
+
+            AccountDTO accountDTO = mapper.accountParaAccountDTO(account);
+
+            return ResponseEntity.ok().body(new PutUpdateAccountResp(
+                    formattedDate,
+                    accountDTO
+            ));
         }catch (AccountNotAvailableException er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro de account não disponivel: %s", er.getMessage()));
             return ResponseEntity.badRequest().body(new ExceptionResponse("Erro de conta invalida", er.getMessage()));
@@ -108,10 +122,15 @@ public class AccountController {
 
 
     @PatchMapping("/update-password")
-    public ResponseEntity<Object> UpdatePassword(@RequestBody PostUpdatePasswordReq request) {
+    public ResponseEntity<Object> UpdatePassword(@RequestBody PatchUpdatePasswordReq request) {
         try {
             this._accountService.updatePassword(request.oldPassword(), request.newPassword(), request.newPasswordCheck());
-            return ResponseEntity.ok().build();
+
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
+            String formattedDate = formatter.format(date);
+
+            return ResponseEntity.ok().body(new PatchUpdatePasswordResp(formattedDate));
         } catch (PasswordNotEqualException er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro de senha não iguais: %s", er.getMessage()));
             return ResponseEntity.badRequest().body(new ExceptionResponse("Erro de senha", er.getMessage()));

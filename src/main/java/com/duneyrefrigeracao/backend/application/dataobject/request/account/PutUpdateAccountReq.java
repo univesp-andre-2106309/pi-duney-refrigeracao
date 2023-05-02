@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 
-public record PostUpdateAccountReq (
+public record PutUpdateAccountReq(
         @JsonProperty(required = true) String firstName,
         @JsonProperty(required = true) String lastName,
         @JsonProperty(required = true) String email,
