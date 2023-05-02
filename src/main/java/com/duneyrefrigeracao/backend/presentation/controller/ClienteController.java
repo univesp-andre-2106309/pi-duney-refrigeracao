@@ -143,7 +143,7 @@ public class ClienteController {
                     "Erro de requisição",
                     "Valor de ID não valido!"
             ));
-        }catch(Exception er) {
+        } catch(Exception er) {
             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
             return ResponseEntity.internalServerError().build();
         }

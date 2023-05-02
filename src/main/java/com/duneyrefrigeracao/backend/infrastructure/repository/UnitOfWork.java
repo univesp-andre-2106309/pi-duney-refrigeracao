@@ -5,6 +5,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class UnitOfWork implements IUnitOfWork{
 
+    private final AccountRepository accountRepository;
+
+    private final ClienteRepository clienteRepository;
+
+    private final FornecedorRepository fornecedorRepository;
+    private final ProdutoRepository produtoRepository;
+    private final ServicoRepository servicoRepository;
+    private final TecnicoRepository tecnicoRepository;
+
+    public UnitOfWork(AccountRepository accountRepository,
+                      ClienteRepository clienteRepository,
+                      FornecedorRepository fornecedorRepository,
+                      ProdutoRepository produtoRepository,
+                      ServicoRepository servicoRepository,
+                      TecnicoRepository tecnicoRepository) {
+        this.accountRepository = accountRepository;
+        this.clienteRepository = clienteRepository;
+        this.fornecedorRepository = fornecedorRepository;
+        this.produtoRepository = produtoRepository;
+        this.servicoRepository = servicoRepository;
+        this.tecnicoRepository = tecnicoRepository;
+    }
+
     public AccountRepository getAccountRepository() {
         return this.accountRepository;
     }
@@ -14,12 +37,23 @@ public class UnitOfWork implements IUnitOfWork{
         return this.clienteRepository;
     }
 
-    private final AccountRepository accountRepository;
+    @Override
+    public FornecedorRepository getFornecedorRepository() {
+        return this.fornecedorRepository;
+    }
 
-    private final ClienteRepository clienteRepository;
+    @Override
+    public ServicoRepository getServicoRepository() {
+        return this.servicoRepository;
+    }
 
-    public UnitOfWork(AccountRepository accountRepository, ClienteRepository clienteRepository) {
-        this.accountRepository = accountRepository;
-        this.clienteRepository = clienteRepository;
+    @Override
+    public TecnicoRepository getTecnicoRepository() {
+        return this.tecnicoRepository;
+    }
+
+    @Override
+    public ProdutoRepository getProdutoRepository() {
+        return this.produtoRepository;
     }
 }
