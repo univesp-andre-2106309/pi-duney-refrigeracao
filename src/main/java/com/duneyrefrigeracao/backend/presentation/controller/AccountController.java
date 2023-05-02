@@ -93,7 +93,7 @@ public class AccountController {
 
             Account account = mapper.updateAccountParaAccount(request);
 
-            this._accountService.accountUpdate(account);
+            account = this._accountService.accountUpdate(account);
 
             Date date = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
@@ -151,7 +151,7 @@ public class AccountController {
 
 
     @GetMapping("find-account")
-    public ResponseEntity<Object> getAccountById(@RequestParam(required = true) String id) {
+    public ResponseEntity<Object> getAccountById(@RequestParam(required = true,value = "id") String id) {
         try {
             AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
             Account account = this._accountService.findAccountById(Long.valueOf(id));
@@ -168,7 +168,7 @@ public class AccountController {
                     "Valor de ID não valido!"
             ));
         } catch (AccountNotFoundException er) {
-            this._logging.LogMessage(LogLevel.INFO, String.format("Conta vinculada ao ID (%d) não foi encontrada",id));
+            this._logging.LogMessage(LogLevel.INFO, String.format("Conta vinculada ao ID (%s) não foi encontrada",id));
             return ResponseEntity.badRequest().body(new ExceptionResponse("Erro durante a busca", "Não foi encontrada uma conta com o id informado"));
         } catch (Exception er) {
             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));

@@ -129,7 +129,7 @@ public class AccountService implements IAccountService {
     }
 
     @Override
-    public void accountUpdate(Account upAccount) throws AccountNotAvailableException, EmailPatternException {
+    public Account accountUpdate(Account upAccount) throws AccountNotAvailableException, EmailPatternException {
         UserDetails details;
         Object object = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         this._logging.LogMessage(LogLevel.INFO, "Iniciando processo de atualização de dados da senha.....");
@@ -155,6 +155,7 @@ public class AccountService implements IAccountService {
         this._unitOfWork.getAccountRepository().save(ogAccount);
         this._logging.LogMessage(LogLevel.INFO, "Dados atualizados com sucesso!");
 
+        return ogAccount;
     }
 
     @Override
