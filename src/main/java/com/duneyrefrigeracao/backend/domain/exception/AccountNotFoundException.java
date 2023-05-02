@@ -5,4 +5,8 @@ public class AccountNotFoundException extends RuntimeException{
       super(String.format("A conta de nome %s não foi encontrada!", accountName));
   }
 
+  public AccountNotFoundException(){
+      super("Não foi possivel encontrar a conta pelos parametros de busca");
+  }
+
 }

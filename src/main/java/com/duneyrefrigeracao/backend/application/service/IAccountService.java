@@ -16,7 +16,8 @@ public interface IAccountService {
     String retrieveUsername(String email);
     String generateAccountToken(String userName);
     UserDetails loadUserDetailsByUsername(String username);
-
     void accountUpdate(Account upAccount) throws AccountNotAvailableException, EmailPatternException;
     void updatePassword(String oldPassword, String newPassword, String newPasswordCheck) throws PasswordNotEqualException, InvalidPasswordException, AccountNotAvailableException, NoSuchAlgorithmException, InvalidKeySpecException;
+
+    Account findAccountById(Long id) throws AccountNotFoundException;
 }

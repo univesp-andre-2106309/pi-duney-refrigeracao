@@ -4,8 +4,7 @@ package com.duneyrefrigeracao.backend.presentation.controller;
 import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.AccountDTO;
 import com.duneyrefrigeracao.backend.application.dataobject.request.account.PutUpdateAccountReq;
 import com.duneyrefrigeracao.backend.application.dataobject.request.account.PatchUpdatePasswordReq;
-import com.duneyrefrigeracao.backend.application.dataobject.response.account.PatchUpdatePasswordResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.account.PutUpdateAccountResp;
+import com.duneyrefrigeracao.backend.application.dataobject.response.account.*;
 import com.duneyrefrigeracao.backend.application.mapper.AccountMapper;
 import com.duneyrefrigeracao.backend.application.service.IAccountService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
@@ -13,8 +12,6 @@ import com.duneyrefrigeracao.backend.domain.exception.*;
 import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionResponse;
 import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostCreateAccountReq;
 import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostValidateLoginReq;
-import com.duneyrefrigeracao.backend.application.dataobject.response.account.PostCreateAccountResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.account.PostValidateLoginResp;
 import com.duneyrefrigeracao.backend.domain.model.Account;
 import com.duneyrefrigeracao.backend.infrastructure.logging.ILogging;
 import com.duneyrefrigeracao.backend.infrastructure.logging.Logging;
@@ -89,9 +86,9 @@ public class AccountController {
     }
 
     @PutMapping("/update-account")
-    public ResponseEntity<Object> UpdateAccount(@RequestBody PutUpdateAccountReq request){
+    public ResponseEntity<Object> UpdateAccount(@RequestBody PutUpdateAccountReq request) {
 
-        try{
+        try {
             AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
 
             Account account = mapper.updateAccountParaAccount(request);
@@ -108,10 +105,10 @@ public class AccountController {
                     formattedDate,
                     accountDTO
             ));
-        }catch (AccountNotAvailableException er) {
+        } catch (AccountNotAvailableException er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro de account não disponivel: %s", er.getMessage()));
             return ResponseEntity.badRequest().body(new ExceptionResponse("Erro de conta invalida", er.getMessage()));
-        } catch(EmailPatternException er) {
+        } catch (EmailPatternException er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro de validação do email: %s", er.getMessage()));
             return ResponseEntity.badRequest().body(new ExceptionResponse("Erro de validação", er.getMessage()));
         } catch (Exception er) {
@@ -150,5 +147,33 @@ public class AccountController {
             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+
+    @GetMapping("find-account")
+    public ResponseEntity<Object> getAccountById(@RequestParam(required = true) String id) {
+        try {
+            AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
+            Account account = this._accountService.findAccountById(Long.valueOf(id));
+
+            AccountDTO accountDTO = mapper.accountParaAccountDTO(account);
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
+            String formattedDate = formatter.format(date);
+
+            return ResponseEntity.ok().body(new GetAccountByIdResp(formattedDate,accountDTO));
+        } catch (NumberFormatException er) {
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Erro de requisição",
+                    "Valor de ID não valido!"
+            ));
+        } catch (AccountNotFoundException er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Conta vinculada ao ID (%d) não foi encontrada",id));
+            return ResponseEntity.badRequest().body(new ExceptionResponse("Erro durante a busca", "Não foi encontrada uma conta com o id informado"));
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
+            return ResponseEntity.internalServerError().build();
+        }
+
     }
 }

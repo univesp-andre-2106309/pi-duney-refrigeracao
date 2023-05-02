@@ -199,5 +199,21 @@ public class AccountService implements IAccountService {
 
     }
 
+    @Override
+    public Account findAccountById(Long id) {
+
+        this._logging.LogMessage(LogLevel.INFO, String.format("Buscando account pelo id - %d", id));
+
+        try{
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados a conta de Id - %s",id));
+            Account account = this._unitOfWork.getAccountRepository().getReferenceById(id);
+            this._logging.LogMessage(LogLevel.INFO, String.format("Foi encontrado dados da conta - %s", account.toString()));
+            return account;
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar conta, erro será jogado como AccountNotFoundException, erro original -> %s", er.getMessage()));
+            throw new AccountNotFoundException();
+        }
+    }
+
 
 }

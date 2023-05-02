@@ -10,7 +10,6 @@ public record AccountDTO(
         @JsonProperty String lastName,
         @JsonProperty String username,
         @JsonProperty String email,
-        @JsonProperty String password,
         @JsonProperty @JsonFormat(pattern = "dd/MM/YYYY") Date birthDate
 ) {
 }

@@ -8,6 +8,7 @@ import java.util.Date;
 
 @Entity
 @Data
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
