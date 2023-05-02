@@ -7,6 +7,8 @@ import com.duneyrefrigeracao.backend.domain.model.Cliente;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper
 public interface ClienteMapper {
 
@@ -17,4 +19,7 @@ public interface ClienteMapper {
     Cliente UpdateClienteParaCliente(PutUpdateClienteReq req);
 
     ClienteDTO ClienteParaClienteDTO(Cliente req);
+
+
+    List<ClienteDTO> ListaCLienteParaListaClienteDTO(List<Cliente> req);
 }

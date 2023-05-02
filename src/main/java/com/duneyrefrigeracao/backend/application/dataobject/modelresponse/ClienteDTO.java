@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 public record ClienteDTO(
+        @JsonProperty
+        String id,
+
         @JsonProperty(required = true)
         String nome,
         @JsonProperty(required = true)

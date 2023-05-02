@@ -7,6 +7,7 @@ import com.duneyrefrigeracao.backend.application.dataobject.request.cliente.Post
 import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.GetClienteByIdResponse;
 import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PostAdicionarClienteResp;
 import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PostBuscarClientesResp;
+import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PutUpdateClienteResp;
 import com.duneyrefrigeracao.backend.application.mapper.ClienteMapper;
 import com.duneyrefrigeracao.backend.application.service.IClienteService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/cliente")
@@ -31,7 +33,7 @@ public class ClienteController {
 
 
     private final IClienteService _service;
-    private ILogging _logging;
+    private final ILogging _logging;
 
     public ClienteController(IClienteService _service) {
         this._service = _service;
@@ -47,10 +49,14 @@ public class ClienteController {
             Tuple<Long, Collection<Cliente>> result =
                     _service.getClientesByParams(nomeValue, documentoValue, Integer.parseInt(indexValue));
 
+            ClienteMapper mapper = Mappers.getMapper(ClienteMapper.class);
+            List<ClienteDTO> lista = mapper.ListaCLienteParaListaClienteDTO(result.getSecondValue().stream().toList());
+
             return ResponseEntity.ok().body(new PostBuscarClientesResp(
                     result.getFirstValue(),
-                    result.getSecondValue()
+                    lista
             ));
+
         } catch (Exception er) {
             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
             return ResponseEntity.internalServerError().build();
@@ -97,7 +103,14 @@ public class ClienteController {
         Cliente cliente = mapper.UpdateClienteParaCliente(request);
         try {
             this._service.updateCliente(cliente, Long.valueOf(id));
-            return ResponseEntity.ok(cliente);
+
+            ClienteDTO clienteDTO = mapper.ClienteParaClienteDTO(cliente);
+
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
+            String formattedDate = formatter.format(date);
+
+            return ResponseEntity.ok().body(new PutUpdateClienteResp(formattedDate, clienteDTO));
         } catch (NumberFormatException er) {
 
             return ResponseEntity.badRequest().body(new ExceptionResponse(
