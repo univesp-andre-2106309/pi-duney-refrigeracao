@@ -1,7 +1,9 @@
 package com.duneyrefrigeracao.backend.application.service;
 
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
+import com.duneyrefrigeracao.backend.domain.exception.AccountValidationException;
 import com.duneyrefrigeracao.backend.domain.exception.ClienteExistenteException;
+import com.duneyrefrigeracao.backend.domain.exception.ClienteNotFoundException;
 import com.duneyrefrigeracao.backend.domain.exception.EmailPatternException;
 import com.duneyrefrigeracao.backend.domain.model.Cliente;
 import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
@@ -77,4 +79,25 @@ public class ClienteService implements IClienteService {
 
         return cliente;
     }
+
+    @Override
+    public void updateCliente(Cliente upCliente, Long id) throws ClienteNotFoundException {
+        Cliente ogCliente;
+        this._logging.LogMessage(LogLevel.INFO,String.format("Atualizando dados do cliente %s", upCliente.getNome()));
+        try{
+            ogCliente = this._unitOfWork.getClienteRepository().getReferenceById(id);
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar cliente, erro será jogado como ClienteNotFoundException, erro original -> %s", er.getMessage()));
+            throw new ClienteNotFoundException(upCliente.getNome());
+        }
+
+        upCliente.setId(ogCliente.getId());
+        upCliente.setEnabled(ogCliente.isEnabled());
+
+        this._unitOfWork.getClienteRepository().save(upCliente);
+
+        this._logging.LogMessage(LogLevel.INFO, "Dados atualizados com sucesso!");
+    }
+
+
 }

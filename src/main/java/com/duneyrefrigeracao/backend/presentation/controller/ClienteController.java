@@ -1,15 +1,15 @@
 package com.duneyrefrigeracao.backend.presentation.controller;
 
 import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionResponse;
-import com.duneyrefrigeracao.backend.application.dataobject.request.cliente.PostBuscarClientesReq;
+import com.duneyrefrigeracao.backend.application.dataobject.request.account.PutUpdateClienteReq;
 import com.duneyrefrigeracao.backend.application.dataobject.request.cliente.PostAdicionarClienteReq;
 import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PostAdicionarClienteResp;
 import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PostBuscarClientesResp;
 import com.duneyrefrigeracao.backend.application.mapper.ClienteMapper;
-import com.duneyrefrigeracao.backend.application.service.ClienteService;
 import com.duneyrefrigeracao.backend.application.service.IClienteService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
 import com.duneyrefrigeracao.backend.domain.exception.ClienteExistenteException;
+import com.duneyrefrigeracao.backend.domain.exception.ClienteNotFoundException;
 import com.duneyrefrigeracao.backend.domain.exception.EmailPatternException;
 import com.duneyrefrigeracao.backend.domain.model.Cliente;
 import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
@@ -37,8 +37,8 @@ public class ClienteController {
     }
 
     @GetMapping("/busca")
-    public ResponseEntity<Object> postBuscarClientes(@RequestParam(value = "documento",defaultValue = "") String documentoValue,
-                                                     @RequestParam(value = "nome",defaultValue = "") String nomeValue,
+    public ResponseEntity<Object> postBuscarClientes(@RequestParam(value = "documento", defaultValue = "") String documentoValue,
+                                                     @RequestParam(value = "nome", defaultValue = "") String nomeValue,
                                                      @RequestParam(value = "index", defaultValue = "0") String indexValue) {
         try {
             this._logging.LogMessage(LogLevel.INFO, String.format("Buscando clientes, index %s, campo nome: %s, campo documento %s", indexValue, nomeValue, documentoValue));
@@ -50,7 +50,7 @@ public class ClienteController {
                     result.getSecondValue()
             ));
         } catch (Exception er) {
-            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s",er.getMessage()));
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -71,7 +71,7 @@ public class ClienteController {
                     formattedDate
             ));
         } catch (EmailPatternException er) {
-            this._logging.LogMessage(LogLevel.INFO, String.format("Email já existente no banco de dados!"));
+            this._logging.LogMessage(LogLevel.INFO, String.format("Formatação do campo email invalida - %s", er.getMessage()));
             return ResponseEntity.badRequest().body(new ExceptionResponse(
                     "Erro de validação",
                     er.getMessage()
@@ -79,13 +79,40 @@ public class ClienteController {
         } catch (ClienteExistenteException er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Cliente já existente no banco de dados!"));
             return ResponseEntity.badRequest().body(new ExceptionResponse(
-                    "Erro ao dicionar cliente",
+                    "Erro ao adicionar cliente",
                     er.getMessage()
             ));
         } catch (Exception er) {
-            this._logging.LogMessage(LogLevel.INFO, String.format("Erro não tratado -> %s", er.getMessage()));
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @PutMapping("/update-cliente")
+    public ResponseEntity<Object> putUpdateCliente(@RequestParam(value = "id") String id,
+                                                   @RequestBody PutUpdateClienteReq request) {
+        ClienteMapper mapper = Mappers.getMapper(ClienteMapper.class);
+        Cliente cliente = mapper.UpdateClienteParaCliente(request);
+        try {
+            this._service.updateCliente(cliente, Long.valueOf(id));
+        } catch (NumberFormatException er) {
+
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Erro de requisição",
+                    "Valor de ID não valido!"
+            ));
+        } catch (ClienteNotFoundException er) {
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Erro ao atualizar dados",
+                    er.getMessage()
+            ));
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(cliente);
+    }
+
 
 }
