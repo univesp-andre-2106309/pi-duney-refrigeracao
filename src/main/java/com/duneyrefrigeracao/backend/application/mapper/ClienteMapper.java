@@ -1,5 +1,6 @@
 package com.duneyrefrigeracao.backend.application.mapper;
 
+import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.ClienteDTO;
 import com.duneyrefrigeracao.backend.application.dataobject.request.account.PutUpdateClienteReq;
 import com.duneyrefrigeracao.backend.application.dataobject.request.cliente.PostAdicionarClienteReq;
 import com.duneyrefrigeracao.backend.domain.model.Cliente;
@@ -14,4 +15,6 @@ public interface ClienteMapper {
     Cliente AddClienteParaCliente(PostAdicionarClienteReq req);
 
     Cliente UpdateClienteParaCliente(PutUpdateClienteReq req);
+
+    ClienteDTO ClienteParaClienteDTO(Cliente req);
 }

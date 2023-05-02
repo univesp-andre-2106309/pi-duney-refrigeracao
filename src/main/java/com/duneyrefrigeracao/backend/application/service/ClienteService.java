@@ -99,5 +99,18 @@ public class ClienteService implements IClienteService {
         this._logging.LogMessage(LogLevel.INFO, "Dados atualizados com sucesso!");
     }
 
+    @Override
+    public Cliente getClienteById(Long id) {
+        try{
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados do cliente de Id - %s",id));
+            Cliente cliente = this._unitOfWork.getClienteRepository().getReferenceById(id);
+            this._logging.LogMessage(LogLevel.INFO, String.format("Foi encontrado dados do cliente - %s", cliente.toString()));
+            return cliente;
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar cliente, erro será jogado como ClienteNotFoundException, erro original -> %s", er.getMessage()));
+            throw new ClienteNotFoundException();
+        }
+    }
+
 
 }

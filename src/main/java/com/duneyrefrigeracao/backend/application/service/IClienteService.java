@@ -11,4 +11,6 @@ public interface IClienteService {
     Tuple<Long, Collection<Cliente>> getClientesByParams(String nome, String documento, int index);
     Cliente saveCliente(Cliente cliente);
     void updateCliente(Cliente upCliente, Long id) throws ClienteNotFoundException;
+
+    Cliente getClienteById(Long id);
 }
