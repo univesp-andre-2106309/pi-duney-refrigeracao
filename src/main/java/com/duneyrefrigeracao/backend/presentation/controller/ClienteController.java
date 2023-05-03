@@ -40,14 +40,14 @@ public class ClienteController {
         this._logging = new Logging(ClienteController.class);
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/search")
     public ResponseEntity<Object> postBuscarClientes(@RequestParam(value = "documento", defaultValue = "") String documentoValue,
                                                      @RequestParam(value = "nome", defaultValue = "") String nomeValue,
-                                                     @RequestParam(value = "index", defaultValue = "0") String indexValue) {
+                                                     @RequestParam(value = "index", defaultValue = "0") Integer indexValue) {
         try {
             this._logging.LogMessage(LogLevel.INFO, String.format("Buscando clientes, index %s, campo nome: %s, campo documento %s", indexValue, nomeValue, documentoValue));
             Tuple<Long, Collection<Cliente>> result =
-                    _service.getClientesByParams(nomeValue, documentoValue, Integer.parseInt(indexValue));
+                    _service.getClientesByParams(nomeValue, documentoValue, indexValue );
 
             ClienteMapper mapper = Mappers.getMapper(ClienteMapper.class);
             List<ClienteDTO> lista = mapper.ListaCLienteParaListaClienteDTO(result.getSecondValue().stream().toList());
@@ -63,14 +63,14 @@ public class ClienteController {
         }
     }
 
-    @PostMapping("/adicionar")
+    @PostMapping("/create")
     public ResponseEntity<Object> postAdicionarClientes(@RequestBody PostAdicionarClienteReq request) {
         try {
             ClienteMapper mapper = Mappers.getMapper(ClienteMapper.class);
             Cliente cliente = mapper.AddClienteParaCliente(request);
             _service.saveCliente(cliente);
             Date date = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
             String formattedDate = formatter.format(date);
 
 
@@ -96,18 +96,18 @@ public class ClienteController {
         }
     }
 
-    @PutMapping("/update-cliente")
-    public ResponseEntity<Object> putUpdateCliente(@RequestParam(value = "id") String id,
+    @PutMapping("/update")
+    public ResponseEntity<Object> putUpdateCliente(@RequestParam(value = "id") Long id,
                                                    @RequestBody PutUpdateClienteReq request) {
         ClienteMapper mapper = Mappers.getMapper(ClienteMapper.class);
         Cliente cliente = mapper.UpdateClienteParaCliente(request);
         try {
-            this._service.updateCliente(cliente, Long.valueOf(id));
+            this._service.updateCliente(cliente, id);
 
             ClienteDTO clienteDTO = mapper.ClienteParaClienteDTO(cliente);
 
             Date date = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
             String formattedDate = formatter.format(date);
 
             return ResponseEntity.ok().body(new PutUpdateClienteResp(formattedDate, clienteDTO));
@@ -129,11 +129,11 @@ public class ClienteController {
     }
 
 
-    @GetMapping("findById")
-    public ResponseEntity<Object> getClienteById(@RequestParam(value = "id") String id) {
+    @GetMapping("find")
+    public ResponseEntity<Object> getClienteById(@RequestParam(value = "id") Long id) {
 
         try{
-            Cliente cliente = this._service.getClienteById(Long.valueOf(id));
+            Cliente cliente = this._service.getClienteById(id);
             ClienteMapper mapper = Mappers.getMapper(ClienteMapper.class);
             ClienteDTO clienteDTO = mapper.ClienteParaClienteDTO(cliente);
 

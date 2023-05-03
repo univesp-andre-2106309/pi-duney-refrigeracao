@@ -73,10 +73,10 @@ public class TecnicoController {
         }
     }
 
-    @GetMapping("find-tecnico")
-    public ResponseEntity<Object> getTecnicoById(@RequestParam(name = "id") String id) {
+    @GetMapping("find")
+    public ResponseEntity<Object> getTecnicoById(@RequestParam(name = "id") Long id) {
         try {
-            Tecnico tecnico = this._service.getTecnicoById(Long.valueOf(id));
+            Tecnico tecnico = this._service.getTecnicoById(id);
             TecnicoMapper mapper = Mappers.getMapper(TecnicoMapper.class);
             TecnicoDTO tecnicoDTO = mapper.TecnicoParaTecnicoDTO(tecnico);
 
@@ -102,13 +102,13 @@ public class TecnicoController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Object> putUpdateTecnico(@RequestParam(value = "id") String id,
+    public ResponseEntity<Object> putUpdateTecnico(@RequestParam(value = "id") Long id,
                                                    @RequestBody PutUpdateTecnicoReq request) {
         try {
             TecnicoMapper mapper = Mappers.getMapper(TecnicoMapper.class);
             Tecnico tecnico = mapper.UpdateTecnicoParaTecnico(request);
 
-            this._service.updateTecnico(tecnico, Long.valueOf(id));
+            this._service.updateTecnico(tecnico, id);
 
             TecnicoDTO tecnicoDTO = mapper.TecnicoParaTecnicoDTO(tecnico);
 
@@ -137,13 +137,13 @@ public class TecnicoController {
         }
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/search")
     public ResponseEntity<Object> getBuscarTecnicos(@RequestParam(value = "documento", defaultValue = "") String documentoValue,
                                                     @RequestParam(value = "nome", defaultValue = "") String nomeValue,
-                                                    @RequestParam(value = "index", defaultValue = "0") String indexValue) {
+                                                    @RequestParam(value = "index", defaultValue = "0") Integer indexValue) {
         try {
             Tuple<Long, Collection<Tecnico>> result =
-                    this._service.getTecnicosByParams(nomeValue,documentoValue,Integer.parseInt(indexValue));
+                    this._service.getTecnicosByParams(nomeValue,documentoValue,indexValue);
             TecnicoMapper mapper = Mappers.getMapper(TecnicoMapper.class);
             List<TecnicoDTO> lista = mapper.ListaTecnicoParaListaTecnicoDTO(result.getSecondValue().stream().toList());
 

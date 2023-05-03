@@ -73,7 +73,7 @@ public class ProdutoController {
         }
     }
 
-    @GetMapping("find-produto")
+    @GetMapping("find")
     public ResponseEntity<Object> getProdutoById(@RequestParam(name = "id") int id) {
         try {
             ProdutoMapper mapper = Mappers.getMapper(ProdutoMapper.class);
@@ -140,7 +140,7 @@ public class ProdutoController {
     }
 
 
-    @GetMapping("/busca")
+    @GetMapping("/search")
     public ResponseEntity<Object> getBuscarProdutos(@RequestParam(value = "nome", defaultValue = "") String nomeValue,
                                                     @RequestParam(value = "precoMin", required = false) BigDecimal precoMinValue,
                                                     @RequestParam(value = "precoMax", required = false) BigDecimal precoMaxValue,

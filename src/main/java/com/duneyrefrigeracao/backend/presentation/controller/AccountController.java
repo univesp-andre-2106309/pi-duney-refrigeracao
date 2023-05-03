@@ -85,7 +85,7 @@ public class AccountController {
         }
     }
 
-    @PutMapping("/update-account")
+    @PutMapping("/update")
     public ResponseEntity<Object> UpdateAccount(@RequestBody PutUpdateAccountReq request) {
 
         try {
@@ -150,11 +150,11 @@ public class AccountController {
     }
 
 
-    @GetMapping("find-account")
-    public ResponseEntity<Object> getAccountById(@RequestParam(required = true,value = "id") String id) {
+    @GetMapping("find")
+    public ResponseEntity<Object> getAccountById(@RequestParam(required = true,value = "id") Long id) {
         try {
             AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
-            Account account = this._accountService.findAccountById(Long.valueOf(id));
+            Account account = this._accountService.findAccountById(id);
 
             AccountDTO accountDTO = mapper.accountParaAccountDTO(account);
             Date date = new Date();

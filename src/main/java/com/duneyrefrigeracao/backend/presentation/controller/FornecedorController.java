@@ -70,10 +70,10 @@ public class FornecedorController {
         }
     }
 
-    @GetMapping("find-fornecedor")
-    public ResponseEntity<Object> getFornecedorById(@RequestParam(name = "id") String id) {
+    @GetMapping("find")
+    public ResponseEntity<Object> getFornecedorById(@RequestParam(name = "id") Long id) {
         try {
-            Fornecedor fornecedor = this._service.getFornecedorById(Long.valueOf(id));
+            Fornecedor fornecedor = this._service.getFornecedorById(id);
             FornecedorMapper mapper = Mappers.getMapper(FornecedorMapper.class);
             FornecedorDTO fornecedorDTO = mapper.FornecedorParaFornecedorDTO(fornecedor);
 
@@ -100,13 +100,13 @@ public class FornecedorController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Object> putUpdateFornecedor(@RequestParam(value = "id") String id,
+    public ResponseEntity<Object> putUpdateFornecedor(@RequestParam(value = "id") Long id,
                                                       @RequestBody PutUpdateFornecedorReq request) {
         try {
             FornecedorMapper mapper = Mappers.getMapper(FornecedorMapper.class);
             Fornecedor fornecedor = mapper.UpdateFornecedorParaFornecedor(request);
 
-            this._service.updateFornecedor(fornecedor, Long.valueOf(id));
+            this._service.updateFornecedor(fornecedor, id);
 
             FornecedorDTO fornecedorDTO = mapper.FornecedorParaFornecedorDTO(fornecedor);
 
@@ -136,13 +136,13 @@ public class FornecedorController {
         }
     }
 
-    @GetMapping("/busca")
+    @GetMapping("/search")
     public ResponseEntity<Object> getBuscarFornecedores(@RequestParam(value = "documento", defaultValue = "") String documentoValue,
                                                         @RequestParam(value = "nome", defaultValue = "") String nomeValue,
-                                                        @RequestParam(value = "index", defaultValue = "0") String indexValue) {
+                                                        @RequestParam(value = "index", defaultValue = "0") Integer indexValue) {
         try {
             Tuple<Long, Collection<Fornecedor>> result =
-                    this._service.getFornecedoresByParams(nomeValue,documentoValue,Integer.parseInt(indexValue));
+                    this._service.getFornecedoresByParams(nomeValue,documentoValue,indexValue);
             FornecedorMapper mapper = Mappers.getMapper(FornecedorMapper.class);
             List<FornecedorDTO> lista = mapper.ListaFornecedorParaListaFornecedorDTO(result.getSecondValue().stream().toList());
 
