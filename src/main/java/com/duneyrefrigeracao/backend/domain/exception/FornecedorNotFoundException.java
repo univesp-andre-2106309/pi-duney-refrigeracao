@@ -6,6 +6,6 @@ public class FornecedorNotFoundException extends RuntimeException{
     }
 
     public FornecedorNotFoundException(){
-        super("Não foi possivel encontrar o cliente atraves do parametro informado");
+        super("Não foi possivel encontrar o fornecedor atraves do parametro informado");
     }
 }

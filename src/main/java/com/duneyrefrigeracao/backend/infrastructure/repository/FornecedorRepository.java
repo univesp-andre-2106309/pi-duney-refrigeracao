@@ -8,8 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface FornecedorRepository extends JpaRepository<Fornecedor,Long> {
 
     Page<Fornecedor> findByNomeLikeIgnoreCaseAndCnpjLikeIgnoreCase(String nome, String cnpj, Pageable pageable);
-
     Long countByNomeLikeIgnoreCaseAndCnpjLikeIgnoreCase(String nome, String cnpj);
-
     Long countByEmailIgnoreCase(String email);
 }

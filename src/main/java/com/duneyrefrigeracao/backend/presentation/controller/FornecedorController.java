@@ -35,7 +35,7 @@ public class FornecedorController {
 
     public FornecedorController(IFornecedorService service) {
         this._service = service;
-        this._logging = new Logging((ClienteController.class));
+        this._logging = new Logging((FornecedorController.class));
     }
 
     @PostMapping("/create")
