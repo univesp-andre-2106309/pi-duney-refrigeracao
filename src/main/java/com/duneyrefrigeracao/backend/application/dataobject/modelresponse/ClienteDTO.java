@@ -39,7 +39,7 @@ public record ClienteDTO(
         @JsonProperty
         String info,
 
-        @JsonProperty(required = true) @JsonFormat(pattern = "dd/MM/YYYY")
+        @JsonProperty(required = true) @JsonFormat(pattern = "dd/MM/yyyy", locale = "pt-BR", timezone = "Brazil/East")
         Date dtNascimento
 ) {
 }

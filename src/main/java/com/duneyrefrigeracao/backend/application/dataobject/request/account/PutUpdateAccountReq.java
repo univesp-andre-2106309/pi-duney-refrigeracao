@@ -9,6 +9,6 @@ public record PutUpdateAccountReq(
         @JsonProperty(required = true) String firstName,
         @JsonProperty(required = true) String lastName,
         @JsonProperty(required = true) String email,
-        @JsonProperty(required = true) @JsonFormat(pattern = "dd/MM/YYYY") Date birthDate
+        @JsonProperty(required = true) @JsonFormat(pattern = "dd/MM/yyyy", locale = "pt-BR", timezone = "Brazil/East") Date birthDate
 ){
 }

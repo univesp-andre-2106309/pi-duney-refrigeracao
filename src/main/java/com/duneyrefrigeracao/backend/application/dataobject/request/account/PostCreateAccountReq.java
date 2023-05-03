@@ -11,6 +11,6 @@ public record PostCreateAccountReq(
         @JsonProperty String username,
         @JsonProperty String email,
         @JsonProperty String password,
-        @JsonProperty @JsonFormat(pattern = "dd/MM/YYYY") Date birthDate
+        @JsonProperty @JsonFormat(pattern = "dd/MM/yyyy", locale = "pt-BR", timezone = "Brazil/East") Date birthDate
 ) {
 };

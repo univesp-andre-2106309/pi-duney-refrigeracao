@@ -19,6 +19,6 @@ public record PutUpdateClienteReq(
         @Column(nullable = false) String numCel,
         @Column(nullable = false) String email,
         @Column(nullable = false) String info,
-        @Column(nullable = false) @JsonFormat(pattern = "dd/MM/YYYY") Date dtNascimento
+        @Column(nullable = false) @JsonFormat(pattern = "dd/MM/yyyy", locale = "pt-BR", timezone = "Brazil/East") Date dtNascimento
 ) {
 }
