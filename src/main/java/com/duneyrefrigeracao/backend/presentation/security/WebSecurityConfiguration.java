@@ -1,6 +1,6 @@
 package com.duneyrefrigeracao.backend.presentation.security;
 
-import com.duneyrefrigeracao.backend.presentation.filter.JwtAuthenticationFilter;
+import com.duneyrefrigeracao.backend.presentation.filter.JwtAuthorizationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,11 +15,11 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableWebSecurity
 public class WebSecurityConfiguration {
 
-    private final JwtAuthenticationFilter _jwtAuthorizationFilter;
+    private final JwtAuthorizationFilter _jwtAuthorizationFilter;
     private final AuthEntrypoint _authEntrypoint;
 
 
-    public WebSecurityConfiguration(JwtAuthenticationFilter _jwtAuthorizationFilter, AuthEntrypoint authEntrypoint) {
+    public WebSecurityConfiguration(JwtAuthorizationFilter _jwtAuthorizationFilter, AuthEntrypoint authEntrypoint) {
         this._jwtAuthorizationFilter = _jwtAuthorizationFilter;
         this._authEntrypoint = authEntrypoint;
     }

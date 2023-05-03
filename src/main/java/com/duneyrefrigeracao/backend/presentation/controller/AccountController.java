@@ -66,7 +66,7 @@ public class AccountController {
                 String token = this._accountService.generateAccountToken(username);
 
                 HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", "Bearer " + token);
+                headers.set("Authorization", token);
 
                 this._logging.LogMessage(LogLevel.INFO, String.format("Autenticação do login do email %s feita com sucesso!", request.email()));
                 return ResponseEntity.ok().headers(headers).body(new PostValidateLoginResp("Validação feita com sucesso", true));

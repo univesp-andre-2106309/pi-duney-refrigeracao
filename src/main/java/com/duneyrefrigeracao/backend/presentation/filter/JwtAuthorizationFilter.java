@@ -17,13 +17,13 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
+public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
 
     private final IJwtProvider _jwtProvider;
     private final IAccountService _accountService;
 
-    public JwtAuthenticationFilter(@Lazy AuthenticationManager authenticationManager, IJwtProvider _jwtProvider, IAccountService _accountService) {
+    public JwtAuthorizationFilter(@Lazy AuthenticationManager authenticationManager, IJwtProvider _jwtProvider, IAccountService _accountService) {
         super(authenticationManager);
         this._jwtProvider = _jwtProvider;
         this._accountService = _accountService;
@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String header = request.getHeader("Authentication");
+        String header = request.getHeader("Authorization");
 
         //if (header == null || !header.startsWith("Bearer ")) {
         if (header == null) {
