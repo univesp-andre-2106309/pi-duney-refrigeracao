@@ -121,7 +121,6 @@ public class TecnicoController {
                     tecnicoDTO
             ));
         } catch (NumberFormatException er) {
-
             return ResponseEntity.badRequest().body(new ExceptionResponse(
                     "Erro de requisição",
                     "Valor de ID não valido!"

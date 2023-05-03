@@ -26,7 +26,7 @@ public class Produto {
     @Column(nullable = false)
     private BigDecimal preco;
     @Column(nullable = false)
-    private String estoque;
+    private int estoque;
 
     @Column(nullable = false)
     private boolean isActive;
