@@ -39,6 +39,7 @@ public class ProdutoService implements IProdutoService {
         this._logging.LogMessage(LogLevel.INFO, String.format("Busca será realizada com paginação de %d", _pageSize));
         Pageable pageable = PageRequest.of(index, _pageSize);
         Collection<Produto> collection;
+        Page<Produto> result;
 
         if (precoMin == null) {
             precoMin = new BigDecimal(0L);
@@ -57,8 +58,13 @@ public class ProdutoService implements IProdutoService {
 
         this._logging.LogMessage(LogLevel.INFO, String.format("Existem no total %d de resultados", count));
 
-        Page<Produto> result =
-                this._unitOfWork.getProdutoRepository().findByPriceBetween(precoMin, precoMax, nome, pageable);
+        if(order.equals(OrderByEnum.ASC)) {
+            result =
+                    this._unitOfWork.getProdutoRepository().findByPriceBetweenAscend(precoMin, precoMax, nome, pageable);
+        } else {
+            result =
+                    this._unitOfWork.getProdutoRepository().findByPriceBetweenDescend(precoMin, precoMax, nome, pageable);
+        }
 
         collection = result.getContent();
         if (!collection.isEmpty()) {
@@ -131,11 +137,11 @@ public class ProdutoService implements IProdutoService {
 
     @Override
     public Produto updateProdutoPreco(BigDecimal preco, Long id) throws ValorMenorQueZeroException {
-        if(preco.compareTo(BigDecimal.ZERO) < 0) {
+        if (preco.compareTo(BigDecimal.ZERO) < 0) {
             throw new ValorMenorQueZeroException();
         }
 
-        try{
+        try {
             this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados de produto de id - %s", id));
             Produto produto = this._unitOfWork.getProdutoRepository().getReferenceById(id);
             this._logging.LogMessage(LogLevel.INFO, String.format("Foi encontrado dados do produto - %s", produto.toString()));
@@ -149,7 +155,7 @@ public class ProdutoService implements IProdutoService {
 
             return produto;
 
-        }catch (Exception er) {
+        } catch (Exception er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar produto por id - %d, erro original -> %s", id, er.getMessage()));
             throw new ProdutoNotFoundException();
         }
@@ -158,11 +164,11 @@ public class ProdutoService implements IProdutoService {
     @Override
     public Produto updateProdutoEstoque(int estoque, Long id) throws ValorMenorQueZeroException {
 
-        if(estoque < 0) {
+        if (estoque < 0) {
             throw new ValorMenorQueZeroException();
         }
 
-        try{
+        try {
             this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados de produto de id - %s", id));
             Produto produto = this._unitOfWork.getProdutoRepository().getReferenceById(id);
             this._logging.LogMessage(LogLevel.INFO, String.format("Foi encontrado dados do produto - %s", produto.toString()));
@@ -176,7 +182,7 @@ public class ProdutoService implements IProdutoService {
 
             return produto;
 
-        }catch (Exception er) {
+        } catch (Exception er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar produto por id - %d, erro original -> %s", id, er.getMessage()));
             throw new ProdutoNotFoundException();
         }

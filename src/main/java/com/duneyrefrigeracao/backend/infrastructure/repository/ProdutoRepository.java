@@ -11,8 +11,10 @@ import java.math.BigDecimal;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
-    @Query("SELECT p FROM Produto p WHERE p.preco >= :precoMin AND p.preco <= :precoMax and p.nome like %:nome%")
-    Page<Produto> findByPriceBetween(@Param("precoMin") BigDecimal precoMin,@Param("precoMax") BigDecimal precoMax,@Param("nome") String nome, Pageable pageable);
+    @Query("SELECT p FROM Produto p WHERE p.preco >= :precoMin AND p.preco <= :precoMax and p.nome like %:nome% ORDER BY p.id ASC ")
+    Page<Produto> findByPriceBetweenAscend(@Param("precoMin") BigDecimal precoMin, @Param("precoMax") BigDecimal precoMax, @Param("nome") String nome, Pageable pageable);
+    @Query("SELECT p FROM Produto p WHERE p.preco >= :precoMin AND p.preco <= :precoMax and p.nome like %:nome% ORDER BY p.id DESC")
+    Page<Produto> findByPriceBetweenDescend(@Param("precoMin") BigDecimal precoMin, @Param("precoMax") BigDecimal precoMax, @Param("nome") String nome, Pageable pageable);
 
     @Query("SELECT COUNT(p.id) FROM Produto p WHERE p.preco >= :precoMin AND p.preco <= :precoMax and p.nome like %:nome%")
     Long findAndCountByPriceBetween(@Param("precoMin") BigDecimal precoMin,@Param("precoMax") BigDecimal precoMax,@Param("nome") String nome);
