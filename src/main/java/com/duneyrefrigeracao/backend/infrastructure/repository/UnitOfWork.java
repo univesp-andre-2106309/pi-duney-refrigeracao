@@ -17,13 +17,14 @@ public class UnitOfWork implements IUnitOfWork{
     private final ProdutoServicoRepository produtoServicoRepository;
     private final TecnicoServicoRepository tecnicoServicoRepository;
     private final FornecedorServicoRepository fornecedorServicoRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public UnitOfWork(AccountRepository accountRepository,
                       ClienteRepository clienteRepository,
                       FornecedorRepository fornecedorRepository,
                       ProdutoRepository produtoRepository,
                       ServicoRepository servicoRepository,
-                      TecnicoRepository tecnicoRepository, ProdutoServicoRepository produtoServicoRepository, TecnicoServicoRepository tecnicoServicoRepository, FornecedorServicoRepository fornecedorServicoRepository) {
+                      TecnicoRepository tecnicoRepository, ProdutoServicoRepository produtoServicoRepository, TecnicoServicoRepository tecnicoServicoRepository, FornecedorServicoRepository fornecedorServicoRepository, RefreshTokenRepository refreshTokenRepository) {
         this.accountRepository = accountRepository;
         this.clienteRepository = clienteRepository;
         this.fornecedorRepository = fornecedorRepository;
@@ -33,6 +34,7 @@ public class UnitOfWork implements IUnitOfWork{
         this.produtoServicoRepository = produtoServicoRepository;
         this.tecnicoServicoRepository = tecnicoServicoRepository;
         this.fornecedorServicoRepository = fornecedorServicoRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     public AccountRepository getAccountRepository() {
@@ -77,5 +79,10 @@ public class UnitOfWork implements IUnitOfWork{
     @Override
     public FornecedorServicoRepository getFornecedorServicoRepository() {
         return this.fornecedorServicoRepository;
+    }
+
+    @Override
+    public RefreshTokenRepository getRefreshTokenRepository() {
+        return this.refreshTokenRepository;
     }
 }

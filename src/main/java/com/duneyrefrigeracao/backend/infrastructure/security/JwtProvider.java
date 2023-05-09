@@ -1,31 +1,38 @@
 package com.duneyrefrigeracao.backend.infrastructure.security;
 
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
+import com.duneyrefrigeracao.backend.domain.exception.AccountNotFoundException;
+import com.duneyrefrigeracao.backend.domain.model.Account;
+import com.duneyrefrigeracao.backend.domain.model.RefreshToken;
+import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
 import com.duneyrefrigeracao.backend.infrastructure.logging.ILogging;
 import com.duneyrefrigeracao.backend.infrastructure.logging.Logging;
+import com.duneyrefrigeracao.backend.infrastructure.repository.IUnitOfWork;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.util.*;
 
 @Component
 public class JwtProvider implements IJwtProvider {
 
     //Definido por minutos
-    private static final int TOKEN_DURATION = 15;
+    private static final int TOKEN_DURATION = 45;
     private final ILogging _logging;
+    private final IUnitOfWork _unitOfWork;
 
 
-    public JwtProvider(){
+    public JwtProvider(IUnitOfWork unitofWork){
+        this._unitOfWork = unitofWork;
         this._logging = new Logging(JwtProvider.class);
     }
 
@@ -82,10 +89,56 @@ public class JwtProvider implements IJwtProvider {
             return true;
         } catch(ExpiredJwtException er) {
             this._logging.LogMessage(LogLevel.INFO, "Token informado se encontra expirado!");
-            return false;
+            throw er;
         } catch (Exception er) {
             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s",er.getMessage()));
             return false;
         }
     }
+
+    public RefreshToken generateRefreshToken(String token, String username) {
+        Account account = this._unitOfWork.getAccountRepository().findAccountByUsername(username);
+        if (account == null) {
+            throw new AccountNotFoundException();
+        }
+
+        String generatedToken = UUID.randomUUID().toString().replace("-", "");
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setRefreshToken(generatedToken);
+        refreshToken.setAvailable(true);
+        refreshToken.setToken(token);
+        refreshToken.setAccount(account);
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo"));
+        calendar.add(Calendar.HOUR, 5);
+
+        refreshToken.setExpirationDate(calendar);
+
+        refreshToken = this._unitOfWork.getRefreshTokenRepository().save(refreshToken);
+
+        return refreshToken;
+    }
+
+    public Tuple<RefreshToken, String> validateRefreshToken(String refreshToken) {
+       RefreshToken token =
+               this._unitOfWork.getRefreshTokenRepository().findRefreshTokenByParams(refreshToken,Calendar.getInstance(TimeZone.getTimeZone("America/Sao_Paulo")));
+       if(token == null) {
+           return null;
+       }
+
+       String newToken =  this.generateToken(token.getAccount().getUsername());
+
+        RefreshToken newRefreshToken =
+                this.generateRefreshToken(newToken, token.getAccount().getUsername());
+
+        token.setAvailable(false);
+
+        _unitOfWork.getRefreshTokenRepository().save(token);
+
+
+        return new Tuple<>(newRefreshToken, newToken);
+    }
+
+
+
 }

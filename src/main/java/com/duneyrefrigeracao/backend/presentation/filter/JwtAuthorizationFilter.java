@@ -1,7 +1,10 @@
 package com.duneyrefrigeracao.backend.presentation.filter;
 
 import com.duneyrefrigeracao.backend.application.service.IAccountService;
+import com.duneyrefrigeracao.backend.domain.model.RefreshToken;
+import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
 import com.duneyrefrigeracao.backend.infrastructure.security.IJwtProvider;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +18,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
@@ -22,6 +28,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private final IJwtProvider _jwtProvider;
     private final IAccountService _accountService;
+    private static final List<String> SKIP_ENDPOINTS = Arrays.asList("/api/account/login","/api/account/create");
 
     public JwtAuthorizationFilter(@Lazy AuthenticationManager authenticationManager, IJwtProvider _jwtProvider, IAccountService _accountService) {
         super(authenticationManager);
@@ -34,6 +41,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
+        String refreshToken = request.getHeader("RefreshToken");
+
+        if (SKIP_ENDPOINTS.contains(request.getRequestURI())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         //if (header == null || !header.startsWith("Bearer ")) {
         if (header == null) {
@@ -42,18 +55,43 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         String token = header.replace("Bearer ", "");
+        UsernamePasswordAuthenticationToken auth;
+        UserDetails userDetails;
 
-        UsernamePasswordAuthenticationToken auth = authenticate(token);
+        try {
+            auth = authenticate(token);
+            if (auth == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        //TODO: Adicionar funcionalidade refresh token.
-
-        if (auth == null) {
+            SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
-            return;
-        }
+        } catch (ExpiredJwtException er) {
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        filterChain.doFilter(request, response);
+            if(refreshToken == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            Tuple<RefreshToken, String> newRefreshTokenTpl = this._jwtProvider.validateRefreshToken(refreshToken);
+
+            if (newRefreshTokenTpl == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            userDetails = _accountService.loadUserDetailsByUsername(newRefreshTokenTpl.getFirstValue().getAccount().getUsername());
+            auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+            response.addHeader("Authorization", newRefreshTokenTpl.getSecondValue());
+            response.addHeader("RefreshToken", newRefreshTokenTpl.getFirstValue().getRefreshToken());
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            filterChain.doFilter(request, response);
+        } catch (Exception er) {
+            filterChain.doFilter(request, response);
+        }
     }
 
 

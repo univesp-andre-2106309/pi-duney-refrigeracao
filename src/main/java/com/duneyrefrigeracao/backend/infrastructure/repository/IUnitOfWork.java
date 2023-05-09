@@ -12,4 +12,6 @@ public interface IUnitOfWork {
     public ProdutoServicoRepository getProdutoServicoRepository();
     public TecnicoServicoRepository getTecnicoServicoRepository();
     public FornecedorServicoRepository getFornecedorServicoRepository();
+
+    public RefreshTokenRepository getRefreshTokenRepository();
 }

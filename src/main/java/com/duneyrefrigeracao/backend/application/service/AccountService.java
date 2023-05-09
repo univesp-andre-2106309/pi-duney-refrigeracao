@@ -3,6 +3,7 @@ package com.duneyrefrigeracao.backend.application.service;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
 import com.duneyrefrigeracao.backend.domain.exception.*;
 import com.duneyrefrigeracao.backend.domain.model.Account;
+import com.duneyrefrigeracao.backend.domain.model.RefreshToken;
 import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
 import com.duneyrefrigeracao.backend.infrastructure.encryption.IEncrypter;
 import com.duneyrefrigeracao.backend.infrastructure.logging.ILogging;
@@ -19,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Date;
+
 
 @Service
 public class AccountService implements IAccountService {
@@ -38,70 +40,70 @@ public class AccountService implements IAccountService {
     }
 
     public Account persistAccount(PostCreateAccountReq accountReq) throws NoSuchAlgorithmException, InvalidKeySpecException {
-         try{
+        try {
 
-             this._logging.LogMessage(LogLevel.INFO, "Buscando conta existente no banco pelo nome de usuario...");
-             Account accUserVal = _unitOfWork.getAccountRepository().findAccountByUsername(accountReq.username());
+            this._logging.LogMessage(LogLevel.INFO, "Buscando conta existente no banco pelo nome de usuario...");
+            Account accUserVal = _unitOfWork.getAccountRepository().findAccountByUsername(accountReq.username());
 
-             if(accUserVal != null) {
-                 throw new AccountValidationException("Username", "Nome de usuario já existe no sistema!");
-             }
+            if (accUserVal != null) {
+                throw new AccountValidationException("Username", "Nome de usuario já existe no sistema!");
+            }
 
-             this._logging.LogMessage(LogLevel.INFO, "Buscando conta existente no banco pelo email...");
-             Account accEmailVal = _unitOfWork.getAccountRepository().findAccountByEmail(accountReq.email());
+            this._logging.LogMessage(LogLevel.INFO, "Buscando conta existente no banco pelo email...");
+            Account accEmailVal = _unitOfWork.getAccountRepository().findAccountByEmail(accountReq.email());
 
-             if(accEmailVal != null) {
-                 throw new AccountValidationException("Email", "Email já existe no sistema!");
-             }
+            if (accEmailVal != null) {
+                throw new AccountValidationException("Email", "Email já existe no sistema!");
+            }
 
-             Account account = new Account();
+            Account account = new Account();
 
-             account.setFirstName(accountReq.firstName());
-             account.setLastName(accountReq.lastName());
-             account.setUsername(accountReq.username());
-             account.setEmail(accountReq.email());
-             account.setBirthDate(accountReq.birthDate());
-             account.setIsEnabled(true);
+            account.setFirstName(accountReq.firstName());
+            account.setLastName(accountReq.lastName());
+            account.setUsername(accountReq.username());
+            account.setEmail(accountReq.email());
+            account.setBirthDate(accountReq.birthDate());
+            account.setIsEnabled(true);
 
 
-             Tuple<String,String> saltPassword = _encrypter.encryptValue(accountReq.password());
+            Tuple<String, String> saltPassword = _encrypter.encryptValue(accountReq.password());
 
-             account.setPassword(saltPassword.getFirstValue());
-             account.setSalt(saltPassword.getSecondValue());
+            account.setPassword(saltPassword.getFirstValue());
+            account.setSalt(saltPassword.getSecondValue());
 
-             account.setSigningDate(new Date());
+            account.setSigningDate(new Date());
 
-             this._logging.LogMessage(LogLevel.INFO, String.format("Armazenando o usuario %s no banco...", account.getUsername()));
-             _unitOfWork.getAccountRepository().save(account);
-             this._logging.LogMessage(LogLevel.INFO, String.format("Usuario %s adicionado ao banco.", account.getUsername()));
+            this._logging.LogMessage(LogLevel.INFO, String.format("Armazenando o usuario %s no banco...", account.getUsername()));
+            _unitOfWork.getAccountRepository().save(account);
+            this._logging.LogMessage(LogLevel.INFO, String.format("Usuario %s adicionado ao banco.", account.getUsername()));
 
-             return account;
-         }catch(AccountValidationException ave) {
-             this._logging.LogMessage(LogLevel.INFO, String.format("Erro de validação -> %s", ave.getMessage()));
-             throw ave;
-         } catch(Exception er) {
-             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro generico -> %s", er.getMessage()));
-             er.printStackTrace();
-             throw er;
-         }
+            return account;
+        } catch (AccountValidationException ave) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro de validação -> %s", ave.getMessage()));
+            throw ave;
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro generico -> %s", er.getMessage()));
+            er.printStackTrace();
+            throw er;
+        }
 
     }
 
     public boolean verifyLogin(String email, String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         this._logging.LogMessage(LogLevel.INFO, "Procurando uma conta vinculada ao email....");
-       Account account = _unitOfWork.getAccountRepository().findAccountByEmail(email);
+        Account account = _unitOfWork.getAccountRepository().findAccountByEmail(email);
 
-       if(account == null) {
-           throw new AccountValidationException("email", "Não existe uma conta vinculada ao email informado");
-       }
+        if (account == null) {
+            throw new AccountValidationException("email", "Não existe uma conta vinculada ao email informado");
+        }
 
         this._logging.LogMessage(LogLevel.INFO, String.format("Foi encontrado uma conta com o nome %s", account.getUsername()));
 
 
-       String hashPassword = this._encrypter.encryptValueWithSalt(password,account.getSalt()).getFirstValue();
+        String hashPassword = this._encrypter.encryptValueWithSalt(password, account.getSalt()).getFirstValue();
 
 
-       return account.getPassword().equals(hashPassword);
+        return account.getPassword().equals(hashPassword);
 
     }
 
@@ -109,7 +111,8 @@ public class AccountService implements IAccountService {
         this._logging.LogMessage(LogLevel.INFO, "Buscando nome de usuario...");
         return this._unitOfWork.getAccountRepository().findAccountByEmail(email).getUsername();
     }
-    public String generateAccountToken(String userName){
+
+    public String generateAccountToken(String userName) {
         this._logging.LogMessage(LogLevel.INFO, "Gerando token do usuario");
         return _jwtProvider.generateToken(userName);
     }
@@ -117,7 +120,7 @@ public class AccountService implements IAccountService {
     public UserDetails loadUserDetailsByUsername(String username) {
         Account account = this._unitOfWork.getAccountRepository().findAccountByUsername(username);
 
-        if(account != null) {
+        if (account != null) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Requisição do usuario %s", account.getUsername()));
             return new User(
                     account.getUsername(),
@@ -133,8 +136,8 @@ public class AccountService implements IAccountService {
         UserDetails details;
         Object object = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         this._logging.LogMessage(LogLevel.INFO, "Iniciando processo de atualização de dados da senha.....");
-        if(object instanceof UserDetails) {
-            details = (UserDetails)object;
+        if (object instanceof UserDetails) {
+            details = (UserDetails) object;
         } else {
             throw new AccountNotAvailableException();
         }
@@ -164,13 +167,13 @@ public class AccountService implements IAccountService {
         String hashPassword;
         this._logging.LogMessage(LogLevel.INFO, "Iniciando processo de atualização de dados da conta.....");
 
-        if(!newPassword.equals(newPasswordCheck)) {
+        if (!newPassword.equals(newPasswordCheck)) {
             throw new PasswordNotEqualException();
         }
 
         Object object = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(object instanceof UserDetails) {
-            details = (UserDetails)object;
+        if (object instanceof UserDetails) {
+            details = (UserDetails) object;
         } else {
             throw new AccountNotAvailableException();
         }
@@ -178,15 +181,15 @@ public class AccountService implements IAccountService {
         this._logging.LogMessage(LogLevel.INFO, "Buscando conta pelo nome do usuairo.");
         Account account = _unitOfWork.getAccountRepository().findAccountByUsername(details.getUsername());
 
-        if(account != null) {
+        if (account != null) {
             this._logging.LogMessage(LogLevel.INFO, "Comparando senhas....");
-            hashPassword = _encrypter.encryptValueWithSalt(oldPassword,account.getSalt()).getFirstValue();
+            hashPassword = _encrypter.encryptValueWithSalt(oldPassword, account.getSalt()).getFirstValue();
 
-            if(!hashPassword.equals(account.getPassword())){
+            if (!hashPassword.equals(account.getPassword())) {
                 throw new InvalidPasswordException();
             }
 
-           Tuple<String, String> newPasswordTpl = _encrypter.encryptValue(newPassword);
+            Tuple<String, String> newPasswordTpl = _encrypter.encryptValue(newPassword);
 
             account.setPassword(newPasswordTpl.getFirstValue());
             account.setSalt(newPasswordTpl.getSecondValue());
@@ -201,12 +204,23 @@ public class AccountService implements IAccountService {
     }
 
     @Override
+    public RefreshToken generateRefreshToken(String token, String username) {
+
+        RefreshToken refreshToken = this._jwtProvider.generateRefreshToken(token,username);
+
+        return refreshToken;
+    }
+
+
+
+
+    @Override
     public Account findAccountById(Long id) {
 
         this._logging.LogMessage(LogLevel.INFO, String.format("Buscando account pelo id - %d", id));
 
-        try{
-            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados a conta de Id - %s",id));
+        try {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados a conta de Id - %s", id));
             Account account = this._unitOfWork.getAccountRepository().getReferenceById(id);
             this._logging.LogMessage(LogLevel.INFO, String.format("Foi encontrado dados da conta - %s", account.toString()));
             return account;

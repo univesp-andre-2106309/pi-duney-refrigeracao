@@ -36,7 +36,7 @@ public class WebSecurityConfiguration {
                 .authenticationEntryPoint(this._authEntrypoint)
                 .and()
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/api/account/**").permitAll()
+                        request.requestMatchers("/api/account/login", "/api/account/create").permitAll()
                                 .anyRequest().authenticated()
                                 .and()
                                 .addFilterBefore(this._jwtAuthorizationFilter, BasicAuthenticationFilter.class)
