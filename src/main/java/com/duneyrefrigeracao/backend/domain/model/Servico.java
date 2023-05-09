@@ -26,6 +26,9 @@ public class Servico {
     private StatusServico statusServico;
 
     @Column(nullable = false)
+    private Date dtCriacao;
+
+    @Column(nullable = false)
     private Date dtInicial;
 
     private Date dtFinalizacao;

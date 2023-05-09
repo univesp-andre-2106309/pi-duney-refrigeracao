@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
 @Data
@@ -30,5 +31,12 @@ public class ProdutoServico {
 
     @Column(nullable = false)
     private BigDecimal precoProduto;
+
+    @Column(nullable = false)
+    private Date dtCriacao;
+
+    @Column(nullable = false)
+    private boolean deleted;
+
 
 }

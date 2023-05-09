@@ -8,4 +8,8 @@ public interface IUnitOfWork {
     public ServicoRepository getServicoRepository();
     public TecnicoRepository getTecnicoRepository();
     public ProdutoRepository getProdutoRepository();
+
+    public ProdutoServicoRepository getProdutoServicoRepository();
+    public TecnicoServicoRepository getTecnicoServicoRepository();
+    public FornecedorServicoRepository getFornecedorServicoRepository();
 }

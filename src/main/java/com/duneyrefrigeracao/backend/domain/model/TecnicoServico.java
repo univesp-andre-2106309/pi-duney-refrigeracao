@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.Date;
+
 @Entity
 @Data
 @ToString
@@ -24,5 +26,11 @@ public class TecnicoServico {
     @ManyToOne
     @JoinColumn(name = "servico_id")
     private Servico servico;
+
+    @Column(nullable = false)
+    private Date dtCriacao;
+
+    @Column(nullable = false)
+    private boolean deleted;
 
 }
