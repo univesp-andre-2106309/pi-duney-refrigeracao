@@ -1,0 +1,8 @@
+.card-list{
+    text-align: left;
+}
+
+.card-header{
+    background: var(--darker-blue);
+    color: white;
+}

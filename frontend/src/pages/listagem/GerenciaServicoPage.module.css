@@ -1,0 +1,26 @@
+.container{
+    width:768px;
+    height: 768px;
+    text-align: left;
+    padding: 18px;
+}
+
+
+.form-container{
+    background: var(--darker-green);
+    padding: 32px;
+    border-radius: 0 0 12px 12px;
+    margin-bottom: 32px;
+}
+
+.params-extra-container{
+    padding: 12px;
+    background-color: white;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.params-extra-checkbox{
+    text-align: left;
+    margin: 8px 0;
+}

@@ -1,0 +1,19 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+}
+
+:root {
+  --light-blue: #C3F1F4;
+  --darker-blue: #60B9BF;
+  --gray: #5C7173;
+  --darker-green: #396F73;
+  --shiny-blue: #79EAF2;
+  }

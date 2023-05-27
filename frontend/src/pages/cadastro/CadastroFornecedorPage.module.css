@@ -1,0 +1,7 @@
+.container{
+    margin: 38px auto;
+}
+.card-header{
+    background: var(--darker-green);
+    color: white;
+}

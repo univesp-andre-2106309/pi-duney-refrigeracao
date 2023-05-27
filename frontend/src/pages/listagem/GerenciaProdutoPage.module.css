@@ -1,0 +1,25 @@
+.container{
+    width:768px;
+    height: 768px;
+    text-align: left;
+    padding: 18px;
+}
+
+
+.form-container{
+    background: var(--darker-green);
+    padding: 32px;
+    border-radius: 0 0 12px 12px;
+    margin-bottom: 32px;
+}
+
+.preco-slider{
+    padding: 12px;
+    background-color: white;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.preco-checkbox{
+    text-align: left;
+}

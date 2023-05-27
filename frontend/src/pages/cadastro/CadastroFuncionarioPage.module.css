@@ -1,0 +1,13 @@
+.container{
+    margin: 38px auto;
+}
+
+.container-buttons{
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    right: 12px;
+    transform: translateY(-30%);
+
+    /* transform: translate(10%, -100%); */
+}
