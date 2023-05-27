@@ -12,6 +12,7 @@ import com.duneyrefrigeracao.backend.application.mapper.ServicoMapper;
 import com.duneyrefrigeracao.backend.application.service.ServicoService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
 import com.duneyrefrigeracao.backend.domain.enums.OrderByEnum;
+import com.duneyrefrigeracao.backend.domain.enums.StatusServico;
 import com.duneyrefrigeracao.backend.domain.exception.ServicoNotFoundException;
 import com.duneyrefrigeracao.backend.domain.model.Servico;
 import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
@@ -50,7 +51,8 @@ public class ServicoController {
                     servico,
                     mapper.prodServDtoToProService(request.listaProduto()),
                     mapper.tecServDtoToTecService(request.listaTecnico()),
-                    mapper.forServDtoToForServ(request.listaFornecedor()));
+                    mapper.forServDtoToForServ(request.listaFornecedor()),
+                    request.clienteId());
 
             Date date = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
@@ -77,7 +79,8 @@ public class ServicoController {
                     servico,
                     mapper.prodServDtoToProService(request.listaProduto()),
                     mapper.tecServDtoToTecService(request.listaTecnico()),
-                    mapper.forServDtoToForServ(request.listaFornecedor()));
+                    mapper.forServDtoToForServ(request.listaFornecedor()),
+                    request.clienteId());
 
             Date date = new Date();
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy-hh-mm-ss");
@@ -125,11 +128,12 @@ public class ServicoController {
     @GetMapping("/search")
     public ResponseEntity<Object> getBuscarServicos(@RequestParam(value = "dtInicio", required = false) Date dtInicio,
                                                     @RequestParam(value = "dtFim", required = false) Date dtFim,
+                                                    @RequestParam(value = "statusServico", required = false) StatusServico statusServico,
                                                     @RequestParam(value = "order", defaultValue = "DESC", required = false) OrderByEnum order,
                                                     @RequestParam(value = "index", defaultValue = "0") int indexValue) {
         try {
             Tuple<Long, Collection<ServicoDTO>> result =
-                    this._service.getServicosParams(dtInicio, dtFim, order, indexValue);
+                    this._service.getServicosParams(dtInicio, dtFim, order, indexValue, statusServico);
 
             return ResponseEntity.ok().body(new GetBuscarServicosResp(
                     result.getFirstValue(),

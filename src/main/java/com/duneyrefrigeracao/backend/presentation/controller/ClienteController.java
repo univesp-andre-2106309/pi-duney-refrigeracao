@@ -4,10 +4,7 @@ import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionRes
 import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.ClienteDTO;
 import com.duneyrefrigeracao.backend.application.dataobject.request.cliente.PutUpdateClienteReq;
 import com.duneyrefrigeracao.backend.application.dataobject.request.cliente.PostAdicionarClienteReq;
-import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.GetClienteByIdResponse;
-import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PostAdicionarClienteResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PostBuscarClientesResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.PutUpdateClienteResp;
+import com.duneyrefrigeracao.backend.application.dataobject.response.cliente.*;
 import com.duneyrefrigeracao.backend.application.mapper.ClienteMapper;
 import com.duneyrefrigeracao.backend.application.service.IClienteService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
@@ -43,11 +40,12 @@ public class ClienteController {
     @GetMapping("/search")
     public ResponseEntity<Object> postBuscarClientes(@RequestParam(value = "documento", defaultValue = "") String documentoValue,
                                                      @RequestParam(value = "nome", defaultValue = "") String nomeValue,
-                                                     @RequestParam(value = "index", defaultValue = "0") Integer indexValue) {
+                                                     @RequestParam(value = "index", defaultValue = "0") Integer indexValue,
+                                                     @RequestParam(value = "numPages", defaultValue="0") Integer numPages) {
         try {
             this._logging.LogMessage(LogLevel.INFO, String.format("Buscando clientes, index %s, campo nome: %s, campo documento %s", indexValue, nomeValue, documentoValue));
             Tuple<Long, Collection<Cliente>> result =
-                    _service.getClientesByParams(nomeValue, documentoValue, indexValue );
+                    _service.getClientesByParams(nomeValue, documentoValue, indexValue, numPages );
 
             ClienteMapper mapper = Mappers.getMapper(ClienteMapper.class);
             List<ClienteDTO> lista = mapper.ListaCLienteParaListaClienteDTO(result.getSecondValue().stream().toList());
@@ -127,8 +125,6 @@ public class ClienteController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
-
     @GetMapping("find")
     public ResponseEntity<Object> getClienteById(@RequestParam(value = "id") Long id) {
 
@@ -150,5 +146,17 @@ public class ClienteController {
 
     }
 
+    @PatchMapping("/delete")
+    public ResponseEntity<Object> patchDeleteCliente(@RequestParam(value = "id")Long id) {
+        try{
+            ClienteMapper mapper = Mappers.getMapper(ClienteMapper.class);
+            Cliente cliente = this._service.removeClienteById(id);
+            ClienteDTO clienteDTO = mapper.ClienteParaClienteDTO(cliente);
 
+            return ResponseEntity.ok().body(new PatchDeleteClienteResp(clienteDTO));
+        } catch(Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

@@ -4,6 +4,7 @@ import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.Servic
 import com.duneyrefrigeracao.backend.application.mapper.ServicoMapper;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
 import com.duneyrefrigeracao.backend.domain.enums.OrderByEnum;
+import com.duneyrefrigeracao.backend.domain.enums.StatusServico;
 import com.duneyrefrigeracao.backend.domain.exception.ServicoNotFoundException;
 import com.duneyrefrigeracao.backend.domain.model.*;
 import com.duneyrefrigeracao.backend.domain.model.TecnicoServico;
@@ -28,7 +29,7 @@ public class ServicoService implements IServicoService {
 
 
     private final IUnitOfWork _unitOfWork;
-    private static final int _pageSize = 5;
+    private static final int _pageSize = 10;
     private final ILogging _logging;
     private final SimpleDateFormat dateFormat;
 
@@ -39,7 +40,7 @@ public class ServicoService implements IServicoService {
     }
 
     @Override
-    public Tuple<Long, Collection<ServicoDTO>> getServicosParams(Date dtInicial, Date dtFinal, OrderByEnum order, int index) {
+    public Tuple<Long, Collection<ServicoDTO>> getServicosParams(Date dtInicial, Date dtFinal, OrderByEnum order, int index, StatusServico statusServico) {
 
         try {
 
@@ -47,6 +48,7 @@ public class ServicoService implements IServicoService {
             Collection<ServicoDTO> servicoCollection;
             Pageable pageable = PageRequest.of(index, _pageSize);
             Page<Servico> page;
+            Long count;
 
 
             String DB_DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
@@ -66,7 +68,11 @@ public class ServicoService implements IServicoService {
 
             this._logging.LogMessage(LogLevel.INFO, String.format("Buscando por parametros: dtInicial: %s, dtFinal: %s, Ordem: %s, Index: %d", dateFormat.format(dtInicial), dateFormat.format(dtFinal), order.name(), index));
 
-            Long count = this._unitOfWork.getServicoRepository().countByDtCriacaoBetween(dtInicial, dtFinal);
+            if(statusServico == null) {
+                count = this._unitOfWork.getServicoRepository().countByDtCriacaoBetween(dtInicial, dtFinal);
+            } else{
+                count = this._unitOfWork.getServicoRepository().countByDtCriacaoBetweenAndStatusServico(dtInicial, dtFinal,statusServico);
+            }
 
             this._logging.LogMessage(LogLevel.INFO, String.format("Foram encontrado %d resultados", count));
 
@@ -89,6 +95,10 @@ public class ServicoService implements IServicoService {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
+            if(statusServico != null) {
+                servicoCollection = servicoCollection.stream().filter(item -> item.getStatusServico().equals(statusServico)).collect(Collectors.toList());
+            }
+
             _logging.LogMessage(LogLevel.INFO, String.format("Resultado -> %s", servicoCollection.toString()));
 
 
@@ -104,11 +114,15 @@ public class ServicoService implements IServicoService {
     @Override
     public Servico saveServico(Servico servico, List<ProdutoServico> colProduto,
                                List<TecnicoServico> colTecnico,
-                               List<FornecedorServico> colFornecedor) {
+                               List<FornecedorServico> colFornecedor,
+                               Long clienteId) {
 
         servico.setDtCriacao(new Date());
 
         this._logging.LogMessage(LogLevel.INFO, String.format("Salvando Servico -> %s", servico.toString()));
+
+        Cliente cliente =this._unitOfWork.getClienteRepository().getReferenceById(clienteId);
+        servico.setCliente(cliente);
 
         Servico savedServico = this._unitOfWork.getServicoRepository().save(servico);
 
@@ -119,7 +133,7 @@ public class ServicoService implements IServicoService {
                     item.setDtCriacao(new Date());
                     item.setDeleted(false);
                     try {
-                        item.setProduto(this._unitOfWork.getProdutoRepository().getReferenceById(item.getId()));
+                        item.setProduto(this._unitOfWork.getProdutoRepository().getReferenceById(item.getProduto().getId()));
                     } catch (ServicoNotFoundException er) {
                         item.setProduto(null);
                     }
@@ -135,7 +149,7 @@ public class ServicoService implements IServicoService {
                     item.setDtCriacao(new Date());
                     item.setDeleted(false);
                     try {
-                        item.setFornecedor(this._unitOfWork.getFornecedorRepository().getReferenceById(item.getId()));
+                        item.setFornecedor(this._unitOfWork.getFornecedorRepository().getReferenceById(item.getFornecedor().getId()));
                     } catch (ServicoNotFoundException er) {
                         item.setFornecedor(null);
                     }
@@ -152,7 +166,7 @@ public class ServicoService implements IServicoService {
                     item.setDtCriacao(new Date());
                     item.setDeleted(false);
                     try {
-                        item.setTecnico(this._unitOfWork.getTecnicoRepository().getReferenceById(item.getId()));
+                        item.setTecnico(this._unitOfWork.getTecnicoRepository().getReferenceById(item.getTecnico().getId()));
                     } catch (ServicoNotFoundException er) {
                         item.setTecnico(null);
                     }
@@ -173,16 +187,21 @@ public class ServicoService implements IServicoService {
 
 
     @Override
-    public Servico updateServico(Servico servico, List<ProdutoServico> colProduto, List<TecnicoServico> colTecnico, List<FornecedorServico> colFornecedor) {
+    public Servico updateServico(Servico servico, List<ProdutoServico> colProduto, List<TecnicoServico> colTecnico, List<FornecedorServico> colFornecedor, Long clienteId) {
         Servico upServico;
         try {
             upServico = this._unitOfWork.getServicoRepository().getReferenceById(servico.getId());
 
             this._logging.LogMessage(LogLevel.INFO, String.format("Atualizando Servico -> %s", upServico.toString()));
+            Cliente cliente =this._unitOfWork.getClienteRepository().getReferenceById(clienteId);
+            servico.setCliente(cliente);
+            servico.setDtCriacao(upServico.getDtCriacao());
+
+            this._unitOfWork.getServicoRepository().save(servico);
 
             colProduto = colProduto.stream().peek(item -> {
                 item.setServico(upServico);
-                if (item.getId() == null) {
+                if (item.getId() == null  || item.getId() == 0) {
                     item.setDtCriacao(new Date());
                     item.setDeleted(false);
                     try {
@@ -197,7 +216,7 @@ public class ServicoService implements IServicoService {
 
             colFornecedor = colFornecedor.stream().peek(item -> {
                 item.setServico(upServico);
-                if (item.getId() == null) {
+                if (item.getId() == null  || item.getId() == 0) {
                     item.setDtCriacao(new Date());
                     item.setDeleted(false);
                     try {
@@ -212,7 +231,7 @@ public class ServicoService implements IServicoService {
 
             colTecnico = colTecnico.stream().peek(item -> {
                 item.setServico(upServico);
-                if (item.getId() == null) {
+                if (item.getId() == null  || item.getId() == 0) {
                     item.setDtCriacao(new Date());
                     item.setDeleted(false);
                     try {
@@ -243,10 +262,23 @@ public class ServicoService implements IServicoService {
 
             this._logging.LogMessage(LogLevel.INFO, "desabilitando conexões desnecessarias de servico...");
 
-            this._unitOfWork.getProdutoServicoRepository().deleteByServicoIdAndIdNotIn(upServico.getId(), listProdutoId);
-            this._unitOfWork.getTecnicoServicoRepository().deleteByServicoIdAndIdNotIn(upServico.getId(), listTecnicoId);
-            this._unitOfWork.getFornecedorServicoRepository().deleteByServicoIdAndIdNotIn(upServico.getId(), listFornecedorId);
+            if(listProdutoId.isEmpty()) {
+                this._unitOfWork.getProdutoServicoRepository().deleteByServicoId(upServico.getId());
+            } else {
+                this._unitOfWork.getProdutoServicoRepository().deleteByServicoIdAndIdNotIn(upServico.getId(), listProdutoId);
+            }
 
+            if(listTecnicoId.isEmpty()) {
+                this._unitOfWork.getTecnicoServicoRepository().deleteByServicoId(upServico.getId());
+            } else {
+                this._unitOfWork.getTecnicoServicoRepository().deleteByServicoIdAndIdNotIn(upServico.getId(), listTecnicoId);
+            }
+
+            if(listFornecedorId.isEmpty()) {
+                this._unitOfWork.getFornecedorServicoRepository().deleteByServicoId(upServico.getId());
+            } else {
+                this._unitOfWork.getFornecedorServicoRepository().deleteByServicoIdAndIdNotIn(upServico.getId(), listFornecedorId);
+            }
 
             this._logging.LogMessage(LogLevel.INFO, "Serviço atualizado com sucesso!");
             return upServico;
@@ -273,6 +305,8 @@ public class ServicoService implements IServicoService {
                     this._unitOfWork.getTecnicoServicoRepository().findAllByServicoIdAndAndDeletedIsFalse(id)));
             servicoDTO.setListaFornecedor(mapper.forServToForServDto(
                     this._unitOfWork.getFornecedorServicoRepository().findAllByServicoIdAndAndDeletedIsFalse(id)));
+
+
 
 
             return servicoDTO;

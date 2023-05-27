@@ -18,4 +18,10 @@ public interface FornecedorServicoRepository extends JpaRepository<FornecedorSer
     @Transactional
     @Query("UPDATE FornecedorServico ps SET ps.deleted = true WHERE ps.servico.id = :servicoId AND ps.id NOT IN :listId")
     void deleteByServicoIdAndIdNotIn(@Param("servicoId") Long id,@Param("listId") Collection<Long> preserveIdsList);
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE FornecedorServico ps SET ps.deleted = true WHERE ps.servico.id = :servicoId")
+    void deleteByServicoId(@Param("servicoId") Long id);
 }

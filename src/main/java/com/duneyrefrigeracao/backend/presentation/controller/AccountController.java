@@ -2,18 +2,16 @@ package com.duneyrefrigeracao.backend.presentation.controller;
 
 
 import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.AccountDTO;
-import com.duneyrefrigeracao.backend.application.dataobject.request.account.PutUpdateAccountReq;
-import com.duneyrefrigeracao.backend.application.dataobject.request.account.PatchUpdatePasswordReq;
+import com.duneyrefrigeracao.backend.application.dataobject.request.account.*;
 import com.duneyrefrigeracao.backend.application.dataobject.response.account.*;
 import com.duneyrefrigeracao.backend.application.mapper.AccountMapper;
 import com.duneyrefrigeracao.backend.application.service.IAccountService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
 import com.duneyrefrigeracao.backend.domain.exception.*;
 import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionResponse;
-import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostCreateAccountReq;
-import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostValidateLoginReq;
 import com.duneyrefrigeracao.backend.domain.model.Account;
 import com.duneyrefrigeracao.backend.domain.model.RefreshToken;
+import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
 import com.duneyrefrigeracao.backend.infrastructure.logging.ILogging;
 import com.duneyrefrigeracao.backend.infrastructure.logging.Logging;
 import org.mapstruct.factory.Mappers;
@@ -72,11 +70,14 @@ public class AccountController {
                 headers.set("Authorization", token);
                 headers.set("RefreshToken", refreshToken.getRefreshToken());
 
+                headers.add("Access-Control-Expose-Headers","Authorization");
+                headers.add("Access-Control-Expose-Headers","RefreshToken");
+
                 this._logging.LogMessage(LogLevel.INFO, String.format("Autenticação do login do email %s feita com sucesso!", request.email()));
                 return ResponseEntity.ok().headers(headers).body(new PostValidateLoginResp("Validação feita com sucesso", true));
             }
             this._logging.LogMessage(LogLevel.INFO, String.format("Autenticação do login do email %s não pode ser feita - senha incorreta!", request.email()));
-            return ResponseEntity.ok().body(new PostValidateLoginResp("Senha invalida!", false));
+            return ResponseEntity.badRequest().body(new PostValidateLoginResp("Senha invalida!", false));
         } catch (AccountValidationException er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Autenticação do login do email %s não pode ser feita - erro de autenticação - %s", request.email(), er.getMessage()));
             return ResponseEntity.badRequest().body(new ExceptionResponse("Erro de validação", er.getMessage()));
@@ -87,6 +88,31 @@ public class AccountController {
             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<Object> LoginStatus(@RequestBody PostLoginStatus request){
+        try{
+           Tuple<String,String> jwtTokenTuple = this._accountService.validateLoginStatus(request.jwtToken(), request.refreshToken());
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+
+            httpHeaders.set("Authorization", jwtTokenTuple.getFirstValue());
+            httpHeaders.set("RefreshToken", jwtTokenTuple.getSecondValue());
+
+            httpHeaders.add("Access-Control-Expose-Headers","Authorization");
+            httpHeaders.add("Access-Control-Expose-Headers","RefreshToken");
+
+            return ResponseEntity.ok().headers(httpHeaders).build();
+
+        } catch (AccountLoginRefreshException er) {
+            return ResponseEntity.status(401).build();
+
+        } catch(Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
+            return ResponseEntity.status(401).build();
+        }
+
     }
 
     @PutMapping("/update")

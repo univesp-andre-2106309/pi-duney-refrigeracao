@@ -10,6 +10,7 @@ import java.util.Date;
 
 public record PostCreateServicoReq(
 
+        @JsonProperty Long clienteId,
         @JsonProperty String descricao,
         @JsonProperty StatusServico statusServico,
 

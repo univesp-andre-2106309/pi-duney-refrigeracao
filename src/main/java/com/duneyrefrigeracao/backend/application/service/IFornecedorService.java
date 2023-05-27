@@ -8,8 +8,10 @@ import java.util.Collection;
 
 public interface IFornecedorService {
 
-    Tuple<Long, Collection<Fornecedor>> getFornecedoresByParams(String nome, String documento, int index);
+    Tuple<Long, Collection<Fornecedor>> getFornecedoresByParams(String nome, String documento, int index, int numPages);
     Fornecedor saveFornecedor(Fornecedor fornecedor);
     void updateFornecedor(Fornecedor fornecedor, Long id) throws FornecedorNotFoundException;
     Fornecedor getFornecedorById(Long id) throws FornecedorNotFoundException;
+
+    Fornecedor deleteFornecedorByid(Long id);
 }

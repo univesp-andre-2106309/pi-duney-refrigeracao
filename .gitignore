@@ -36,3 +36,5 @@ build/
 ## Others ###
 src/main/resources/application.properties
 logs
+
+/node_modules

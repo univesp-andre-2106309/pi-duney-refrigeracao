@@ -30,6 +30,9 @@ public class TecnicoServico {
     @Column(nullable = false)
     private Date dtCriacao;
 
+    @Column
+    private String descricao;
+
     @Column(nullable = false)
     private boolean deleted;
 

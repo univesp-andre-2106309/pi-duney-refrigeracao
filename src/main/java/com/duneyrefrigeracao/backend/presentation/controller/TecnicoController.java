@@ -4,10 +4,7 @@ import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionRes
 import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.TecnicoDTO;
 import com.duneyrefrigeracao.backend.application.dataobject.request.tecnico.PostCreateTecnicoReq;
 import com.duneyrefrigeracao.backend.application.dataobject.request.tecnico.PutUpdateTecnicoReq;
-import com.duneyrefrigeracao.backend.application.dataobject.response.tecnico.GetBuscarTecnicosResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.tecnico.GetTecnicoByIdResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.tecnico.PostAdicionarTecnicoResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.tecnico.PutUpdateTecnicoResp;
+import com.duneyrefrigeracao.backend.application.dataobject.response.tecnico.*;
 import com.duneyrefrigeracao.backend.application.mapper.TecnicoMapper;
 import com.duneyrefrigeracao.backend.application.service.ITecnicoService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
@@ -140,10 +137,11 @@ public class TecnicoController {
     @GetMapping("/search")
     public ResponseEntity<Object> getBuscarTecnicos(@RequestParam(value = "documento", defaultValue = "") String documentoValue,
                                                     @RequestParam(value = "nome", defaultValue = "") String nomeValue,
-                                                    @RequestParam(value = "index", defaultValue = "0") Integer indexValue) {
+                                                    @RequestParam(value = "index", defaultValue = "0") Integer indexValue,
+                                                    @RequestParam(value = "numPages", defaultValue = "0")int numPages) {
         try {
             Tuple<Long, Collection<Tecnico>> result =
-                    this._service.getTecnicosByParams(nomeValue,documentoValue,indexValue);
+                    this._service.getTecnicosByParams(nomeValue,documentoValue,indexValue, numPages);
             TecnicoMapper mapper = Mappers.getMapper(TecnicoMapper.class);
             List<TecnicoDTO> lista = mapper.ListaTecnicoParaListaTecnicoDTO(result.getSecondValue().stream().toList());
 
@@ -158,6 +156,33 @@ public class TecnicoController {
                     "Valor de ID não valido!"
             ));
         } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PatchMapping("/delete")
+    public ResponseEntity<Object> patchDeleteTecnico(@RequestParam(name = "id") Long id) {
+        try{
+            TecnicoMapper mapper = Mappers.getMapper(TecnicoMapper.class);
+            Tecnico tecnico = this._service.deleteTecnicoById(id);
+            TecnicoDTO tecnicoDTO = mapper.TecnicoParaTecnicoDTO(tecnico);
+
+            return ResponseEntity.ok().body(new PatchDeleteTecnicoResp(tecnicoDTO));
+
+        } catch (NumberFormatException er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Requisição foi feita com uma id de tipo invalido!"));
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Erro de requisição",
+                    "Valor de ID não valido!"
+            ));
+        } catch (TecnicoNotFoundException er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Tecnico não encontrado"));
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Busca vazia",
+                    "Não foi possivel encontrar um técnico"
+            ));
+        } catch(Exception er) {
             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
             return ResponseEntity.internalServerError().build();
         }

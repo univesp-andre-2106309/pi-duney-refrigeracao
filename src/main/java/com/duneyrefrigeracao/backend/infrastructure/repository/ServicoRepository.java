@@ -1,5 +1,6 @@
 package com.duneyrefrigeracao.backend.infrastructure.repository;
 
+import com.duneyrefrigeracao.backend.domain.enums.StatusServico;
 import com.duneyrefrigeracao.backend.domain.model.Servico;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +13,10 @@ import java.util.Date;
 public interface ServicoRepository extends JpaRepository<Servico, Long> {
 
 
+
     Long countByDtCriacaoBetween(Date dtInicial, Date dtFinal);
+
+    Long countByDtCriacaoBetweenAndStatusServico(Date dtInicial, Date dtFinal, StatusServico statusServico);
 
     @Query("SELECT s " +
             "FROM Servico s " +

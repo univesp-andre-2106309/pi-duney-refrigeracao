@@ -8,9 +8,11 @@ import java.util.Collection;
 
 public interface IClienteService {
 
-    Tuple<Long, Collection<Cliente>> getClientesByParams(String nome, String documento, int index);
+    Tuple<Long, Collection<Cliente>> getClientesByParams(String nome, String documento, int index, int numPages);
     Cliente saveCliente(Cliente cliente);
     void updateCliente(Cliente upCliente, Long id) throws ClienteNotFoundException;
 
     Cliente getClienteById(Long id);
+
+    Cliente removeClienteById(Long id);
 }

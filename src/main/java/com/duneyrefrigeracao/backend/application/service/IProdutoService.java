@@ -11,7 +11,7 @@ import java.util.Collection;
 
 public interface IProdutoService {
 
-    Tuple<Long, Collection<Produto>> getProdutoByParams(String nome, BigDecimal precoMin, BigDecimal precoMax, OrderByEnum order, int index);
+    Tuple<Long, Collection<Produto>> getProdutoByParams(String nome, BigDecimal precoMin, BigDecimal precoMax, OrderByEnum order, int index, int numPages);
 
     Produto saveProduto(Produto produto) throws ValorMenorQueZeroException, ProdutoExistenteException;
     Produto updateProduto(Produto produto, Long id);
@@ -20,4 +20,6 @@ public interface IProdutoService {
     Produto updateProdutoPreco(BigDecimal preco, Long id) throws ValorMenorQueZeroException;
 
     Produto updateProdutoEstoque(int estoque, Long id) throws ValorMenorQueZeroException;
+
+    Produto removeProdutoById(Long id);
 }

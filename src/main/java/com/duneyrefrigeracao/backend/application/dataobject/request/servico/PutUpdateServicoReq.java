@@ -12,6 +12,7 @@ import java.util.Date;
 
 public record PutUpdateServicoReq(
         @JsonProperty Long id,
+        @JsonProperty Long clienteId,
         @JsonProperty String descricao,
         @JsonProperty StatusServico statusServico,
 

@@ -32,6 +32,12 @@ public class ProdutoServico {
     @Column(nullable = false)
     private BigDecimal precoProduto;
 
+    @Column
+    private int quantidade;
+
+    @Column
+    private String descricao;
+
     @Column(nullable = false)
     private Date dtCriacao;
 

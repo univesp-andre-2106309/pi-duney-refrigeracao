@@ -7,8 +7,9 @@ import com.duneyrefrigeracao.backend.domain.valueobject.Tuple;
 import java.util.Collection;
 
 public interface ITecnicoService {
-    Tuple<Long, Collection<Tecnico>> getTecnicosByParams(String nome, String documento, int index);
+    Tuple<Long, Collection<Tecnico>> getTecnicosByParams(String nome, String documento, int index, int numPages);
     Tecnico saveTecnico(Tecnico tecnico);
     Tecnico updateTecnico(Tecnico tecnico, Long id) throws TecnicoNotFoundException;
     Tecnico getTecnicoById(Long id) throws TecnicoNotFoundException;
+    Tecnico deleteTecnicoById(Long id);
 }

@@ -23,7 +23,7 @@ public class TecnicoServico implements ITecnicoService{
 
     private final IUnitOfWork _unitOfWork;
     private final IMatcherService _matcherService;
-    private static final int _pageSize = 5;
+    private static final int _pageSize = 10;
     private final ILogging _logging;
 
     public TecnicoServico(IUnitOfWork unitOfWork, IMatcherService matcherService) {
@@ -34,15 +34,19 @@ public class TecnicoServico implements ITecnicoService{
 
 
     @Override
-    public Tuple<Long, Collection<Tecnico>> getTecnicosByParams(String nome, String documento, int index) {
-        this._logging.LogMessage(LogLevel.INFO, String.format("Busca será realizada com paginação de %d",_pageSize));
-        Pageable pageable = PageRequest.of(index,_pageSize);
+    public Tuple<Long, Collection<Tecnico>> getTecnicosByParams(String nome, String documento, int index, int numPages) {
+        if(numPages == 0) {
+            numPages = Integer.MAX_VALUE;
+        }
+        this._logging.LogMessage(LogLevel.INFO, String.format("Busca será realizada com paginação de %d",numPages));
+        Pageable pageable = PageRequest.of(index,numPages);
         Collection<Tecnico> collection;
 
-        Long count =
-                this._unitOfWork.getTecnicoRepository().countByNomeLikeIgnoreCaseAndCpfLikeIgnoreCase(String.format("%%%s%%", nome), String.format("%%%s%%", documento));
 
-        if (count == 0 && (long) index * _pageSize > count) {
+        Long count =
+                this._unitOfWork.getTecnicoRepository().countByParams(String.format("%%%s%%", nome), String.format("%%%s%%", documento));
+
+        if (count == 0 && (long) index * numPages > count) {
             this._logging.LogMessage(LogLevel.INFO, "Busca vazia");
             return new Tuple<>(count, new ArrayList<>());
         }
@@ -50,7 +54,7 @@ public class TecnicoServico implements ITecnicoService{
         this._logging.LogMessage(LogLevel.INFO, String.format("Existem no total %d de resultados", count));
 
         Page<Tecnico> result =
-                this._unitOfWork.getTecnicoRepository().findByNomeLikeIgnoreCaseAndCpfLikeIgnoreCase(String.format("%%%s%%", nome), String.format("%%%s%%", documento), pageable);
+                this._unitOfWork.getTecnicoRepository().findByParams(String.format("%%%s%%", nome), String.format("%%%s%%", documento), pageable);
 
 
         collection = result.getContent();
@@ -114,6 +118,21 @@ public class TecnicoServico implements ITecnicoService{
             Tecnico tecnico = this._unitOfWork.getTecnicoRepository().getReferenceById(id);
             this._logging.LogMessage(LogLevel.INFO, String.format("Foi encontrado dados do tecnico - %s", tecnico.toString()));
 
+            return tecnico;
+        }catch(Exception er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar tecnico por id - %d, erro original -> %s", id, er.getMessage()));
+            throw new TecnicoNotFoundException();
+        }
+    }
+
+    @Override
+    public Tecnico deleteTecnicoById(Long id) {
+        try{
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados de tecnico de id - %s", id));
+            Tecnico tecnico = this._unitOfWork.getTecnicoRepository().getReferenceById(id);
+            tecnico.setActive(false);
+            this._unitOfWork.getTecnicoRepository().save(tecnico);
+            this._logging.LogMessage(LogLevel.INFO, "Técnico removido com sucesso!");
             return tecnico;
         }catch(Exception er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar tecnico por id - %d, erro original -> %s", id, er.getMessage()));

@@ -11,6 +11,7 @@ import com.duneyrefrigeracao.backend.infrastructure.logging.Logging;
 import com.duneyrefrigeracao.backend.infrastructure.repository.IUnitOfWork;
 import com.duneyrefrigeracao.backend.infrastructure.security.IJwtProvider;
 import com.duneyrefrigeracao.backend.application.dataobject.request.account.PostCreateAccountReq;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -206,13 +207,8 @@ public class AccountService implements IAccountService {
     @Override
     public RefreshToken generateRefreshToken(String token, String username) {
 
-        RefreshToken refreshToken = this._jwtProvider.generateRefreshToken(token,username);
-
-        return refreshToken;
+        return this._jwtProvider.generateRefreshToken(token, username);
     }
-
-
-
 
     @Override
     public Account findAccountById(Long id) {
@@ -230,5 +226,31 @@ public class AccountService implements IAccountService {
         }
     }
 
+    @Override
+    public Tuple<String, String> validateLoginStatus(String jwtToken, String refreshToken) {
+        try {
 
+            jwtToken = jwtToken.replace("Bearer ", "");
+
+            if (this._jwtProvider.checkTokenValidation(jwtToken)) {
+                return new Tuple<>(jwtToken, refreshToken);
+            }
+            throw new AccountLoginRefreshException();
+
+        } catch (ExpiredJwtException er) {
+            this._logging.LogMessage(LogLevel.ERROR, "Token expirado, tentando gerar um novo token....");
+            Tuple<RefreshToken, String> newRefreshTokenTpl = this._jwtProvider.validateRefreshToken(refreshToken);
+
+            if (newRefreshTokenTpl == null) {
+                this._logging.LogMessage(LogLevel.ERROR, "Não foi possivel gerar um novo token");
+                throw new AccountLoginRefreshException();
+            }
+            this._logging.LogMessage(LogLevel.ERROR, "Foi gerado um novo token");
+            return new Tuple<>(newRefreshTokenTpl.getSecondValue(), newRefreshTokenTpl.getFirstValue().getRefreshToken());
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro generico -> %s", er.getMessage()));
+            er.printStackTrace();
+            throw er;
+        }
+    }
 }

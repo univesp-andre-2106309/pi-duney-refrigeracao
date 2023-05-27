@@ -4,10 +4,7 @@ import com.duneyrefrigeracao.backend.application.dataobject.generic.ExceptionRes
 import com.duneyrefrigeracao.backend.application.dataobject.modelresponse.FornecedorDTO;
 import com.duneyrefrigeracao.backend.application.dataobject.request.fornecedor.PostCreateFornecedorReq;
 import com.duneyrefrigeracao.backend.application.dataobject.request.fornecedor.PutUpdateFornecedorReq;
-import com.duneyrefrigeracao.backend.application.dataobject.response.fornecedor.GetFornecedorByIdResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.fornecedor.PostAdicionarFornecedorResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.fornecedor.PostBuscarFornecedoresResp;
-import com.duneyrefrigeracao.backend.application.dataobject.response.fornecedor.PutUpdateFornecedorResp;
+import com.duneyrefrigeracao.backend.application.dataobject.response.fornecedor.*;
 import com.duneyrefrigeracao.backend.application.mapper.FornecedorMapper;
 import com.duneyrefrigeracao.backend.application.service.IFornecedorService;
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
@@ -139,10 +136,11 @@ public class FornecedorController {
     @GetMapping("/search")
     public ResponseEntity<Object> getBuscarFornecedores(@RequestParam(value = "documento", defaultValue = "") String documentoValue,
                                                         @RequestParam(value = "nome", defaultValue = "") String nomeValue,
-                                                        @RequestParam(value = "index", defaultValue = "0") Integer indexValue) {
+                                                        @RequestParam(value = "index", defaultValue = "0") Integer indexValue,
+                                                        @RequestParam(value = "numPages", defaultValue = "0") int numPages) {
         try {
             Tuple<Long, Collection<Fornecedor>> result =
-                    this._service.getFornecedoresByParams(nomeValue,documentoValue,indexValue);
+                    this._service.getFornecedoresByParams(nomeValue,documentoValue,indexValue, numPages);
             FornecedorMapper mapper = Mappers.getMapper(FornecedorMapper.class);
             List<FornecedorDTO> lista = mapper.ListaFornecedorParaListaFornecedorDTO(result.getSecondValue().stream().toList());
 
@@ -154,6 +152,34 @@ public class FornecedorController {
             return ResponseEntity.badRequest().body(new ExceptionResponse(
                     "Erro de requisição",
                     "Valor de ID não valido!"
+            ));
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PatchMapping("/delete")
+    public ResponseEntity<Object> patchDeleteProduto(@RequestParam(name = "id") Long id) {
+        try {
+            FornecedorMapper mapper = Mappers.getMapper(FornecedorMapper.class);
+            Fornecedor fornecedor = this._service.deleteFornecedorByid(id);
+            FornecedorDTO fornecedorDTO = mapper.FornecedorParaFornecedorDTO(fornecedor);
+
+            return ResponseEntity.ok().body(new PatchDeleteFornecedorResp(
+                    fornecedorDTO
+            ));
+        } catch (NumberFormatException er) {
+            this._logging.LogMessage(LogLevel.INFO, "Requisição foi feita com uma id de tipo invalido!");
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Erro de requisição",
+                    "Valor de ID não valido!"
+            ));
+        } catch (FornecedorNotFoundException er) {
+            this._logging.LogMessage(LogLevel.INFO, "Fornecedor não encontrado");
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Busca vazia",
+                    "Não foi possivel encontrar um fornecedor"
             ));
         } catch (Exception er) {
             this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));

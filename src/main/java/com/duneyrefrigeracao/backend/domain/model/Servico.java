@@ -22,6 +22,10 @@ public class Servico {
 
     private String descricao;
 
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
     @Enumerated(EnumType.STRING)
     private StatusServico statusServico;
 
@@ -31,5 +35,6 @@ public class Servico {
     @Column(nullable = false)
     private Date dtInicial;
 
+    @Column
     private Date dtFinalizacao;
 }

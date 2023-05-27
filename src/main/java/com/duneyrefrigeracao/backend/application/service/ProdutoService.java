@@ -35,9 +35,14 @@ public class ProdutoService implements IProdutoService {
     }
 
     @Override
-    public Tuple<Long, Collection<Produto>> getProdutoByParams(String nome, BigDecimal precoMin, BigDecimal precoMax, OrderByEnum order, int index) {
-        this._logging.LogMessage(LogLevel.INFO, String.format("Busca será realizada com paginação de %d", _pageSize));
-        Pageable pageable = PageRequest.of(index, _pageSize);
+    public Tuple<Long, Collection<Produto>> getProdutoByParams(String nome, BigDecimal precoMin, BigDecimal precoMax, OrderByEnum order, int index, int numPages) {
+
+        if(numPages == 0) {
+            numPages = Integer.MAX_VALUE;
+        }
+
+        this._logging.LogMessage(LogLevel.INFO, String.format("Busca será realizada com paginação de %d", numPages));
+        Pageable pageable = PageRequest.of(index, numPages);
         Collection<Produto> collection;
         Page<Produto> result;
 
@@ -111,7 +116,7 @@ public class ProdutoService implements IProdutoService {
 
         produto.setId(ogProduto.getId());
         produto.setActive(true);
-        produto.setPreco(ogProduto.getPreco());
+       // produto.setPreco(ogProduto.getPreco());
         produto.setDtCadastro(ogProduto.getDtCadastro());
 
         this._unitOfWork.getProdutoRepository().save(produto);
@@ -182,6 +187,24 @@ public class ProdutoService implements IProdutoService {
 
             return produto;
 
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar produto por id - %d, erro original -> %s", id, er.getMessage()));
+            throw new ProdutoNotFoundException();
+        }
+    }
+
+    @Override
+    public Produto removeProdutoById(Long id) {
+        try {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados de produto de id - %s", id));
+            Produto produto = this._unitOfWork.getProdutoRepository().getReferenceById(id);
+
+            produto.setActive(false);
+
+            this._unitOfWork.getProdutoRepository().save(produto);
+
+            this._logging.LogMessage(LogLevel.INFO, String.format("Produto de id %s removido com sucesso!", id));
+            return produto;
         } catch (Exception er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar produto por id - %d, erro original -> %s", id, er.getMessage()));
             throw new ProdutoNotFoundException();

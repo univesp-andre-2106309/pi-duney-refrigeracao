@@ -145,10 +145,11 @@ public class ProdutoController {
                                                     @RequestParam(value = "precoMin", required = false) BigDecimal precoMinValue,
                                                     @RequestParam(value = "precoMax", required = false) BigDecimal precoMaxValue,
                                                     @RequestParam(value = "order", defaultValue = "DESC") OrderByEnum orderBy,
-                                                    @RequestParam(value = "index", defaultValue = "0") int indexValue) {
+                                                    @RequestParam(value = "index", defaultValue = "0") int indexValue,
+                                                    @RequestParam(value = "numPages", defaultValue = "0")int numPages) {
         try {
             Tuple<Long, Collection<Produto>> result =
-                    this._service.getProdutoByParams(nomeValue, precoMinValue, precoMaxValue, orderBy, indexValue);
+                    this._service.getProdutoByParams(nomeValue, precoMinValue, precoMaxValue, orderBy, indexValue, numPages);
             ProdutoMapper mapper = Mappers.getMapper(ProdutoMapper.class);
             List<ProdutoDTO> lista = mapper.ListaProdutoParaListaProdutoDTO(result.getSecondValue().stream().toList());
 
@@ -231,6 +232,34 @@ public class ProdutoController {
                     er.getMessage()
             ));
 
+        } catch (ProdutoNotFoundException er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Produto não encontrado"));
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Busca vazia",
+                    "Não foi possivel encontrar um Produto"
+            ));
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.ERROR, String.format("Erro não tratado -> %s", er.getMessage()));
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PatchMapping("/delete")
+    public ResponseEntity<Object> patchDeleteProduto(@RequestParam(name = "id") Long id) {
+        try {
+            ProdutoMapper mapper = Mappers.getMapper(ProdutoMapper.class);
+            Produto produto = this._service.removeProdutoById(id);
+            ProdutoDTO produtoDTO = mapper.ProdutoParaProdutoDTO(produto);
+
+            return ResponseEntity.ok().body(new PatchDeleteProdutoResp(
+                    produtoDTO
+            ));
+        } catch (NumberFormatException er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Requisição foi feita com uma id de tipo invalido!"));
+            return ResponseEntity.badRequest().body(new ExceptionResponse(
+                    "Erro de requisição",
+                    "Valor de ID não valido!"
+            ));
         } catch (ProdutoNotFoundException er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Produto não encontrado"));
             return ResponseEntity.badRequest().body(new ExceptionResponse(

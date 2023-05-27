@@ -7,7 +7,8 @@ import java.util.Date;
 public record FornecedorServicoDTO(
         @JsonProperty Long id,
         @JsonProperty FornecedorDTO fornecedor,
-        @JsonProperty Date dtCriacao
+        @JsonProperty Date dtCriacao,
+        @JsonProperty int quantidade
 
 ) {
 

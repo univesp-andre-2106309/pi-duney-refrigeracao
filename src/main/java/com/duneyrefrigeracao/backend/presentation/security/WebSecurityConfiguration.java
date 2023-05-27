@@ -10,6 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -36,15 +41,38 @@ public class WebSecurityConfiguration {
                 .authenticationEntryPoint(this._authEntrypoint)
                 .and()
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/api/account/login", "/api/account/create").permitAll()
-                                .anyRequest().authenticated()
-                                .and()
-                                .addFilterBefore(this._jwtAuthorizationFilter, BasicAuthenticationFilter.class)
+                        {
+                            try {
+                                request
+
+                                        .requestMatchers("/api/account/login", "/api/account/create", "/api/account/validate").permitAll()
+                                        .anyRequest().authenticated()
+                                        .and()
+                                        .cors()
+                                        .and()
+                                        .addFilterBefore(this._jwtAuthorizationFilter, BasicAuthenticationFilter.class);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                         )
                 .csrf().disable()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+       // configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }

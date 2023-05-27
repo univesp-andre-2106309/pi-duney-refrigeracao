@@ -19,8 +19,9 @@ public interface IAccountService {
     UserDetails loadUserDetailsByUsername(String username);
     Account accountUpdate(Account upAccount) throws AccountNotAvailableException, EmailPatternException;
     void updatePassword(String oldPassword, String newPassword, String newPasswordCheck) throws PasswordNotEqualException, InvalidPasswordException, AccountNotAvailableException, NoSuchAlgorithmException, InvalidKeySpecException;
-
     RefreshToken generateRefreshToken(String token, String username);
-
     Account findAccountById(Long id) throws AccountNotFoundException;
+
+    Tuple<String, String> validateLoginStatus(String jwtToken, String refreshToken);
+
 }

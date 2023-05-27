@@ -9,6 +9,8 @@ public record ProdutoServicoDTO(
         @JsonProperty Long id,
         @JsonProperty ProdutoDTO produto,
         @JsonProperty Date dtCriacao,
-        @JsonProperty BigDecimal precoProduto
+        @JsonProperty BigDecimal precoProduto,
+        @JsonProperty String descricao,
+        @JsonProperty int quantidade
         ) {
 }

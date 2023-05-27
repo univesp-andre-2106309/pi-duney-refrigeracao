@@ -1,7 +1,6 @@
 package com.duneyrefrigeracao.backend.application.service;
 
 import com.duneyrefrigeracao.backend.domain.enums.LogLevel;
-import com.duneyrefrigeracao.backend.domain.exception.AccountValidationException;
 import com.duneyrefrigeracao.backend.domain.exception.ClienteExistenteException;
 import com.duneyrefrigeracao.backend.domain.exception.ClienteNotFoundException;
 import com.duneyrefrigeracao.backend.domain.exception.EmailPatternException;
@@ -17,13 +16,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 @Service
 public class ClienteService implements IClienteService {
 
     private final IUnitOfWork _unitOfWork;
     private final IMatcherService _matcherService;
-    private static final int _pageSize = 5;
+    private static final int _pageSize = 10;
 
     private final ILogging _logging;
 
@@ -33,16 +33,21 @@ public class ClienteService implements IClienteService {
         this._logging = new Logging(ClienteService.class);
     }
 
-    public Tuple<Long, Collection<Cliente>> getClientesByParams(String nome, String documento, int index) {
+    @Override
+    public Tuple<Long, Collection<Cliente>> getClientesByParams(String nome, String documento, int index, int numPages) {
 
         this._logging.LogMessage(LogLevel.INFO, String.format("Busca será realizada com paginação de %d", _pageSize));
 
-        Pageable pageable = PageRequest.of(index, _pageSize);
+        if(numPages == 0) {
+            numPages = Integer.MAX_VALUE;
+        }
+
+        Pageable pageable = PageRequest.of(index, numPages);
         Collection<Cliente> collection;
 
-        Long count = this._unitOfWork.getClienteRepository().countByNomeLikeIgnoreCaseAndDocumentoLikeIgnoreCase(String.format("%%%s%%", nome), String.format("%%%s%%", documento));
+        Long count = this._unitOfWork.getClienteRepository().findByNomeAndDocumentoCount(nome, documento);
 
-        if (count == 0 && (long) index * _pageSize > count) {
+        if (count == 0 && (long) index * numPages > count) {
             this._logging.LogMessage(LogLevel.INFO, "Busca vazia");
             return new Tuple<>(count, new ArrayList<>());
         }
@@ -50,7 +55,7 @@ public class ClienteService implements IClienteService {
         this._logging.LogMessage(LogLevel.INFO, String.format("Existem no total %d de resultados", count));
 
         Page<Cliente> result =
-                this._unitOfWork.getClienteRepository().findByNomeLikeIgnoreCaseAndDocumentoLikeIgnoreCase(String.format("%%%s%%", nome), String.format("%%%s%%", documento), pageable);
+                this._unitOfWork.getClienteRepository().findByNomeAndDocumento(nome,  documento, pageable);
 
         collection = result.getContent();
 
@@ -70,9 +75,13 @@ public class ClienteService implements IClienteService {
             throw new EmailPatternException();
         }
 
-        if (this._unitOfWork.getClienteRepository().countByEmail(cliente.getEmail()) > 0) {
-            throw new ClienteExistenteException();
-        }
+
+//        if (this._unitOfWork.getClienteRepository().countByEmail(cliente.getEmail()) > 0) {
+//            throw new ClienteExistenteException();
+//        }
+
+        cliente.setDtNascimento(new Date());
+        cliente.setEnabled(true);
         this._logging.LogMessage(LogLevel.INFO, String.format("Armazenado o cliente %s ao banco de dados.....", cliente.getNome()));
         this._unitOfWork.getClienteRepository().save(cliente);
         this._logging.LogMessage(LogLevel.INFO, "Cliente salvo com sucesso!");
@@ -83,8 +92,8 @@ public class ClienteService implements IClienteService {
     @Override
     public void updateCliente(Cliente upCliente, Long id) throws ClienteNotFoundException {
         Cliente ogCliente;
-        this._logging.LogMessage(LogLevel.INFO,String.format("Atualizando dados do cliente %s", upCliente.getNome()));
-        try{
+        this._logging.LogMessage(LogLevel.INFO, String.format("Atualizando dados do cliente %s", upCliente.getNome()));
+        try {
             ogCliente = this._unitOfWork.getClienteRepository().getReferenceById(id);
         } catch (Exception er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar cliente, erro será jogado como ClienteNotFoundException, erro original -> %s", er.getMessage()));
@@ -101,11 +110,26 @@ public class ClienteService implements IClienteService {
 
     @Override
     public Cliente getClienteById(Long id) {
-        try{
-            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados do cliente de Id - %s",id));
+        try {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados do cliente de Id - %s", id));
             Cliente cliente = this._unitOfWork.getClienteRepository().getReferenceById(id);
             this._logging.LogMessage(LogLevel.INFO, String.format("Foi encontrado dados do cliente - %s", cliente.toString()));
             return cliente;
+        } catch (Exception er) {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar cliente, erro será jogado como ClienteNotFoundException, erro original -> %s", er.getMessage()));
+            throw new ClienteNotFoundException();
+        }
+    }
+
+    @Override
+    public Cliente removeClienteById(Long id) {
+        try {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados do cliente de Id - %s", id));
+            Cliente cliente = this._unitOfWork.getClienteRepository().getReferenceById(id);
+            cliente.setEnabled(false);
+            this._logging.LogMessage(LogLevel.INFO, String.format("Cliente de Id - %s removido com sucesso", id));
+            Cliente retorno = this._unitOfWork.getClienteRepository().save(cliente);
+            return retorno;
         } catch (Exception er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar cliente, erro será jogado como ClienteNotFoundException, erro original -> %s", er.getMessage()));
             throw new ClienteNotFoundException();

@@ -23,7 +23,7 @@ public class FornecedorService implements IFornecedorService {
 
     private final IUnitOfWork _unitOfWork;
     private final IMatcherService _matcherService;
-    private static final int _pageSize = 5;
+    private static final int _pageSize = 10;
 
     private final ILogging _logging;
 
@@ -34,14 +34,19 @@ public class FornecedorService implements IFornecedorService {
     }
 
     @Override
-    public Tuple<Long, Collection<Fornecedor>> getFornecedoresByParams(String nome, String documento, int index) {
-        this._logging.LogMessage(LogLevel.INFO, String.format("Busca será realizada com paginação de %d", _pageSize));
-        Pageable pageable = PageRequest.of(index,_pageSize);
+    public Tuple<Long, Collection<Fornecedor>> getFornecedoresByParams(String nome, String documento, int index, int numPages) {
+
+        if(numPages == 0) {
+            numPages = Integer.MAX_VALUE;
+        }
+
+        this._logging.LogMessage(LogLevel.INFO, String.format("Busca será realizada com paginação de %d", numPages));
+        Pageable pageable = PageRequest.of(index,numPages);
         Collection<Fornecedor> collection;
 
-        Long count = this._unitOfWork.getFornecedorRepository().countByNomeLikeIgnoreCaseAndCnpjLikeIgnoreCase(String.format("%%%s%%", nome), String.format("%%%s%%", documento));
+        Long count = this._unitOfWork.getFornecedorRepository().countByParams(String.format("%%%s%%", nome), String.format("%%%s%%", documento));
 
-        if (count == 0 && (long) index * _pageSize > count) {
+        if (count == 0 && (long) index * numPages > count) {
             this._logging.LogMessage(LogLevel.INFO, "Busca vazia");
             return new Tuple<>(count, new ArrayList<>());
         }
@@ -49,7 +54,7 @@ public class FornecedorService implements IFornecedorService {
         this._logging.LogMessage(LogLevel.INFO, String.format("Existem no total %d de resultados", count));
 
         Page<Fornecedor> result =
-                this._unitOfWork.getFornecedorRepository().findByNomeLikeIgnoreCaseAndCnpjLikeIgnoreCase(String.format("%%%s%%", nome), String.format("%%%s%%", documento), pageable);
+                this._unitOfWork.getFornecedorRepository().findByParams(String.format("%%%s%%", nome), String.format("%%%s%%", documento), pageable);
 
 
         collection = result.getContent();
@@ -113,6 +118,24 @@ public class FornecedorService implements IFornecedorService {
 
             return fornecedor;
         }catch (Exception er){
+            this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar fornecedor por id - %d, erro original -> %s", id, er.getMessage()));
+            throw new FornecedorNotFoundException();
+        }
+    }
+
+    @Override
+    public Fornecedor deleteFornecedorByid(Long id) {
+        try {
+            this._logging.LogMessage(LogLevel.INFO, String.format("Buscando dados de produto de id - %s", id));
+            Fornecedor fornecedor = this._unitOfWork.getFornecedorRepository().getReferenceById(id);
+
+            fornecedor.setActive(false);
+
+            this._unitOfWork.getFornecedorRepository().save(fornecedor);
+
+            this._logging.LogMessage(LogLevel.INFO, String.format("Fornecedor de id %s removido com sucesso!", id));
+            return fornecedor;
+        } catch (Exception er) {
             this._logging.LogMessage(LogLevel.INFO, String.format("Erro ao consultar fornecedor por id - %d, erro original -> %s", id, er.getMessage()));
             throw new FornecedorNotFoundException();
         }

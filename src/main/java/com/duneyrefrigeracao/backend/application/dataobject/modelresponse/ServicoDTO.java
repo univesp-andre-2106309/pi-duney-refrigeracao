@@ -1,6 +1,7 @@
 package com.duneyrefrigeracao.backend.application.dataobject.modelresponse;
 
 import com.duneyrefrigeracao.backend.domain.enums.StatusServico;
+import com.duneyrefrigeracao.backend.domain.model.Cliente;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,10 @@ public class ServicoDTO {
     private Long id;
     @JsonProperty
     private String descricao;
+    @JsonProperty
+    private ClienteDTO cliente;
+    @JsonProperty
+    private Date dtCriacao;
     @JsonProperty
     private StatusServico statusServico;
     @JsonProperty @JsonFormat(pattern = "dd/MM/yyyy", locale = "pt-BR", timezone = "Brazil/East")

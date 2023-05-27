@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +27,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private final IJwtProvider _jwtProvider;
     private final IAccountService _accountService;
-    private static final List<String> SKIP_ENDPOINTS = Arrays.asList("/api/account/login","/api/account/create");
+    private static final List<String> SKIP_ENDPOINTS = Arrays.asList("/api/account/login","/api/account/create", "/api/account/validate");
 
     public JwtAuthorizationFilter(@Lazy AuthenticationManager authenticationManager, IJwtProvider _jwtProvider, IAccountService _accountService) {
         super(authenticationManager);

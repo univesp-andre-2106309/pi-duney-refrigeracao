@@ -26,7 +26,7 @@ import java.util.*;
 public class JwtProvider implements IJwtProvider {
 
     //Definido por minutos
-    private static final int TOKEN_DURATION = 45;
+    private static final int TOKEN_DURATION = 15;
     private final ILogging _logging;
     private final IUnitOfWork _unitOfWork;
 
@@ -133,7 +133,7 @@ public class JwtProvider implements IJwtProvider {
 
         token.setAvailable(false);
 
-        _unitOfWork.getRefreshTokenRepository().save(token);
+        this._unitOfWork.getRefreshTokenRepository().save(token);
 
 
         return new Tuple<>(newRefreshToken, newToken);

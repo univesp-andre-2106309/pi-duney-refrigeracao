@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 public record PutUpdateProdutoReq(
         @JsonProperty String nome,
         @JsonProperty String descricao,
-        @JsonProperty BigDecimal preco
+        @JsonProperty BigDecimal preco,
+
+        @JsonProperty int estoque
 ) {
 
 }
