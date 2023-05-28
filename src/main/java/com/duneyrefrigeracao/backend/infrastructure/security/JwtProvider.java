@@ -42,7 +42,7 @@ public class JwtProvider implements IJwtProvider {
 
         LocalDateTime now =  LocalDateTime.now();
         LocalDateTime expiryDate = now.plusMinutes(TOKEN_DURATION);
-        String secretKey = System.getenv("JWT_SECRET");
+        String secretKey = System.getenv("BACKEND_JWT_SECRET");
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("iss","duneyrefrigeracao.backend");
@@ -64,7 +64,7 @@ public class JwtProvider implements IJwtProvider {
 
     public String getUsernameFromJwt(String token) {
         try{
-            String secretKey = System.getenv("JWT_SECRET");
+            String secretKey = System.getenv("BACKEND_JWT_SECRET");
             Claims claims = Jwts.parser()
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token)
@@ -80,7 +80,7 @@ public class JwtProvider implements IJwtProvider {
 
     public boolean checkTokenValidation(String token){
         try{
-            String secretKey = System.getenv("JWT_SECRET");
+            String secretKey = System.getenv("BACKEND_JWT_SECRET");
             Date expiryDate = Jwts.parser()
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token)
